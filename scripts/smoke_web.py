@@ -11,6 +11,11 @@ SKIP_TITLES = {
     "Sắp có bao tử hầm tiêu ăn rồi",
     "Nhịn được nhịn luôn đi nghe",
     "Ai cũng như mày chắc quán xá dẹp hết quá",
+    "Cố lên sắp ung thư bao tử gòi",
+    "Bao tử chắc như tổ ong gòi",
+    "Cứ vậy hoài Bác Sĩ mau giàu lắm",
+    "Tính sống tới năm nhiêu tuổi?",
+    "Rầu hết sức",
 }
 
 

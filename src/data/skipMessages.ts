@@ -39,22 +39,47 @@ export const skipMessages: SkipMessage[] = [
     icon: '😂',
     title: 'Ai cũng như mày chắc quán xá dẹp hết quá',
   },
+  {
+    id: 'skip_stomach_cancer',
+    icon: '😵‍💫',
+    title: 'Cố lên sắp ung thư bao tử gòi',
+  },
+  {
+    id: 'skip_honeycomb_stomach',
+    icon: '🐝',
+    title: 'Bao tử chắc như tổ ong gòi',
+  },
+  {
+    id: 'skip_doctor_gets_rich',
+    icon: '🩺',
+    title: 'Cứ vậy hoài Bác Sĩ mau giàu lắm',
+  },
+  {
+    id: 'skip_lifespan_question',
+    icon: '🤨',
+    title: 'Tính sống tới năm nhiêu tuổi?',
+  },
+  {
+    id: 'skip_tired_sigh',
+    icon: '😮‍💨',
+    title: 'Rầu hết sức',
+  },
 ];
 
-let lastSkipMessageId: string | null = null;
+const RECENT_SKIP_MESSAGE_LIMIT = 5;
+
+let recentSkipMessageIds: string[] = [];
 
 export function getRandomSkipMessage(messages: readonly SkipMessage[] = skipMessages): SkipMessage {
   if (messages.length === 0) {
-    lastSkipMessageId = fallbackSkipMessage.id;
+    recentSkipMessageIds = [fallbackSkipMessage.id].slice(-RECENT_SKIP_MESSAGE_LIMIT);
     return fallbackSkipMessage;
   }
 
-  const pool =
-    messages.length > 1 && lastSkipMessageId
-      ? messages.filter((message) => message.id !== lastSkipMessageId)
-      : messages;
+  const blockedIds = new Set(recentSkipMessageIds);
+  const pool = messages.filter((message) => !blockedIds.has(message.id));
   const selected = pickRandom(pool.length > 0 ? pool : messages) ?? fallbackSkipMessage;
 
-  lastSkipMessageId = selected.id;
+  recentSkipMessageIds = [...recentSkipMessageIds, selected.id].slice(-RECENT_SKIP_MESSAGE_LIMIT);
   return selected;
 }

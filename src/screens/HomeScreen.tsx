@@ -29,10 +29,9 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
         <View style={styles.hero}>
           <Image source={heroImage} style={styles.heroImage} resizeMode="cover" />
           <LinearGradient
-            pointerEvents="none"
             colors={['rgba(2,8,12,0.18)', 'rgba(2,8,12,0.48)', 'rgba(2,8,12,0.82)']}
             locations={[0, 0.48, 1]}
-            style={styles.heroOverlay}
+            style={[styles.heroOverlay, styles.noPointerEvents]}
           />
           <View style={[styles.heroText, compact && styles.compactHeroText]}>
             <View style={styles.badge}>
@@ -148,6 +147,9 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
+  },
+  noPointerEvents: {
+    pointerEvents: 'none',
   },
   heroText: {
     flex: 1,

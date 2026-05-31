@@ -14,6 +14,11 @@ SKIP_MESSAGES = {
     "Sắp có bao tử hầm tiêu ăn rồi": "🍲",
     "Nhịn được nhịn luôn đi nghe": "😤",
     "Ai cũng như mày chắc quán xá dẹp hết quá": "😂",
+    "Cố lên sắp ung thư bao tử gòi": "😵‍💫",
+    "Bao tử chắc như tổ ong gòi": "🐝",
+    "Cứ vậy hoài Bác Sĩ mau giàu lắm": "🩺",
+    "Tính sống tới năm nhiêu tuổi?": "🤨",
+    "Rầu hết sức": "😮‍💨",
 }
 
 FORBIDDEN_SKIP_TEXT = [
@@ -106,8 +111,9 @@ def open_q1(page) -> str:
     return body
 
 
-def choose_skip_and_validate(page) -> str:
-    open_q1(page)
+def choose_skip_and_validate(page, *, open_first: bool = True) -> str:
+    if open_first:
+        open_q1(page)
     click_button(page, "Nhịn")
     body = wait_for_body_text(page, "Chọn lại", timeout=30000)
     title = matched_skip_title(body)
@@ -134,23 +140,43 @@ with sync_playwright() as p:
         if msg.type in ("warning", "error")
         and "Download the React DevTools" not in msg.text
         and "ERR_CONNECTION_REFUSED" not in msg.text
+        and "ERR_CONNECTION_RESET" not in msg.text
         else None,
     )
 
     seen_titles: list[str] = []
-    for _ in range(8):
-        title = choose_skip_and_validate(mobile)
+    open_q1(mobile)
+    for _ in range(len(SKIP_MESSAGES)):
+        title = choose_skip_and_validate(mobile, open_first=False)
+        if title in seen_titles[-5:]:
+            raise AssertionError(
+                f"Skip message repeated inside the last 5 selections: {title}. Seen: {seen_titles}"
+            )
         seen_titles.append(title)
         click_button(mobile, "Chọn lại")
         wait_for_body_text(mobile, "Ăn hay nhịn?", timeout=30000)
 
-    assert len(set(seen_titles)) >= 2
+    assert len(set(seen_titles)) >= min(len(SKIP_MESSAGES), 6)
 
     click_button(mobile, "Ăn")
     wait_for_body_text(mobile, "Ăn nhà hay ăn ngoài?", timeout=30000)
 
     desktop = browser.new_page(viewport={"width": 1280, "height": 900})
     desktop_title = choose_skip_and_validate(desktop)
+
+    reset_page = browser.new_page(viewport={"width": 390, "height": 844})
+    reset_page.add_init_script("Math.random = () => 0;")
+    open_q1(reset_page)
+    first_after_load = choose_skip_and_validate(reset_page, open_first=False)
+    click_button(reset_page, "Chọn lại")
+    wait_for_body_text(reset_page, "Ăn hay nhịn?", timeout=30000)
+    second_same_session = choose_skip_and_validate(reset_page, open_first=False)
+    assert second_same_session != first_after_load
+
+    reset_page.reload(wait_until="domcontentloaded", timeout=30000)
+    open_q1(reset_page)
+    first_after_refresh = choose_skip_and_validate(reset_page, open_first=False)
+    assert first_after_refresh == first_after_load
 
     if console_messages:
         raise AssertionError("\n".join(console_messages[:5]))
