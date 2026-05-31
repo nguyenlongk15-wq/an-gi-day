@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build:web",
+  "devCommand": "npx expo start --web",
+  "framework": null,
+  "cleanUrls": true,
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
+  ]
+}

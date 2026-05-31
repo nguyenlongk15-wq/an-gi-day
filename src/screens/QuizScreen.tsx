@@ -1,0 +1,214 @@
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ArrowLeft, RotateCcw } from 'lucide-react-native';
+
+import QuestionCard from '../components/QuestionCard';
+import ProgressBar from '../components/ProgressBar';
+import { getRandomSkipMessage } from '../data/skipMessages';
+import { colors, maxContentWidth } from '../theme';
+import type { AnswerOption, Question, ResultPayload } from '../types';
+import { getBestResults } from '../utils/getBestResults';
+import { getLastShownResultIds, rememberResult } from '../utils/storage';
+import {
+  buildGameQuestions,
+  getBranchFromAnswers,
+  getInitialQuestions,
+  toQuizAnswer,
+  TOTAL_QUESTIONS,
+} from '../utils/quizEngine';
+
+type QuizScreenProps = {
+  onComplete: (result: ResultPayload) => void;
+  onExit: () => void;
+};
+
+export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
+  const [questions, setQuestions] = useState<Question[]>(() => getInitialQuestions());
+  const [answers, setAnswers] = useState<ResultPayload['answers']>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [busy, setBusy] = useState(false);
+
+  const currentQuestion = questions[currentIndex];
+
+  const resetQuiz = () => {
+    setQuestions(getInitialQuestions());
+    setAnswers([]);
+    setCurrentIndex(0);
+    setBusy(false);
+  };
+
+  const completeWithSkip = async (nextAnswers: ResultPayload['answers']) => {
+    onComplete({
+      type: 'skip',
+      branch: 'skip',
+      answers: nextAnswers,
+      skipMessage: getRandomSkipMessage(),
+      isSkip: true,
+    });
+  };
+
+  const completeWithFood = async (nextAnswers: ResultPayload['answers']) => {
+    const branch = getBranchFromAnswers(nextAnswers);
+
+    if (!branch) {
+      resetQuiz();
+      return;
+    }
+
+    const recentIds = await getLastShownResultIds();
+    const bestResult = getBestResults(nextAnswers, branch, recentIds);
+    await rememberResult(bestResult.selected.id);
+
+    onComplete({
+      type: 'food',
+      food: bestResult.selected,
+      branch,
+      answers: nextAnswers,
+      reason: bestResult.reason,
+      topResults: bestResult.topResults,
+    });
+  };
+
+  const handleAnswer = async (answer: AnswerOption) => {
+    if (!currentQuestion || busy) {
+      return;
+    }
+
+    setBusy(true);
+    const quizAnswer = toQuizAnswer(currentQuestion, answer);
+    const nextAnswers = [...answers, quizAnswer];
+
+    try {
+      if (currentQuestion.id === 'q1_eat_or_skip' && answer.id === 'skip') {
+        await completeWithSkip(nextAnswers);
+        return;
+      }
+
+      let nextQuestions = questions;
+
+      if (currentQuestion.id === 'q3_texture') {
+        const branch = getBranchFromAnswers(nextAnswers);
+
+        if (branch) {
+          nextQuestions = buildGameQuestions(branch);
+          setQuestions(nextQuestions);
+        }
+      }
+
+      setAnswers(nextAnswers);
+
+      if (nextAnswers.length >= TOTAL_QUESTIONS) {
+        await completeWithFood(nextAnswers);
+        return;
+      }
+
+      setCurrentIndex((index) => Math.min(index + 1, nextQuestions.length - 1));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const goBack = () => {
+    if (busy) {
+      return;
+    }
+
+    if (currentIndex === 0) {
+      onExit();
+      return;
+    }
+
+    setAnswers((currentAnswers) => currentAnswers.slice(0, -1));
+    setCurrentIndex((index) => Math.max(index - 1, 0));
+  };
+
+  if (!currentQuestion) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.error}>Không tìm thấy câu hỏi.</Text>
+        <HeaderButton label="Chọn lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={resetQuiz} />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.scroll}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <HeaderButton label="Quay lại" icon={<ArrowLeft color={colors.ink} size={18} />} onPress={goBack} />
+          <HeaderButton label="Làm lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={resetQuiz} />
+        </View>
+        <ProgressBar current={Math.min(currentIndex + 1, TOTAL_QUESTIONS)} total={TOTAL_QUESTIONS} />
+        <QuestionCard
+          question={currentQuestion}
+          current={Math.min(currentIndex + 1, TOTAL_QUESTIONS)}
+          total={TOTAL_QUESTIONS}
+          onAnswer={handleAnswer}
+        />
+      </View>
+    </ScrollView>
+  );
+}
+
+function HeaderButton({ label, icon, onPress }: { label: string; icon: ReactNode; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}>
+      {icon}
+      <Text style={styles.headerButtonText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 1,
+    padding: 18,
+    paddingBottom: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    width: '100%',
+    maxWidth: maxContentWidth,
+    gap: 18,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  headerButton: {
+    minHeight: 42,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: colors.line,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerButtonText: {
+    color: colors.ink,
+    fontWeight: '800',
+    fontSize: 14,
+  },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    padding: 18,
+  },
+  error: {
+    color: colors.ink,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  pressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.98 }],
+  },
+});
