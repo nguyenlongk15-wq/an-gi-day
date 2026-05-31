@@ -27,7 +27,7 @@
     "web": "expo start --web",
     "build:web": "npx expo export -p web",
     "dev": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node --stack_size=8192 ./node_modules/typescript/bin/tsc --noEmit"
   },
   "private": true
 }

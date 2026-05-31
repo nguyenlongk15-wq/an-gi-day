@@ -1,4 +1,4 @@
-# Ăn Gì Đây?
+# Ăn hay nhịn?
 
 App mini game chọn món ăn, viết bằng Expo + React Native + TypeScript.
 

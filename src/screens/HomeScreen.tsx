@@ -31,7 +31,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
               <Sparkles color={colors.yellow} size={16} />
               <Text style={styles.badgeText}>Mini game chọn món</Text>
             </View>
-            <Text style={styles.title}>Ăn Gì Đây?</Text>
+            <Text style={styles.title}>Ăn hay nhịn?</Text>
             <Text style={styles.slogan}>Trả lời vài câu, khỏi nghĩ hôm nay ăn gì.</Text>
           </View>
         </View>

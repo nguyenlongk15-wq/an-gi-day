@@ -81,7 +81,7 @@ with sync_playwright() as p:
     )
 
     goto_app(page)
-    wait_for_text(page, "Ăn Gì Đây?")
+    wait_for_text(page, "Ăn hay nhịn?")
     body = page.locator("body").inner_text(timeout=5000)
     assert "Món local" not in body
     assert "Lịch sử" not in body
@@ -121,7 +121,7 @@ with sync_playwright() as p:
     page.screenshot(path=str(ROOT / "web-smoke-result.png"), full_page=True)
 
     page.reload()
-    wait_for_text(page, "Ăn Gì Đây?")
+    wait_for_text(page, "Ăn hay nhịn?")
     click_button(page, "Yêu thích")
     wait_for_text(page, "Yêu thích", timeout=10000)
 
