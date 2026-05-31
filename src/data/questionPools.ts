@@ -3,6 +3,7 @@ import type { Branch, Question } from '../types';
 export const fixedQuestions: Question[] = [
   {
     id: 'q1_eat_or_skip',
+    kind: 'fixed',
     icon: '🤔',
     text: 'Ăn hay nhịn?',
     options: [
@@ -12,6 +13,7 @@ export const fixedQuestions: Question[] = [
   },
   {
     id: 'q2_place',
+    kind: 'fixed',
     icon: '📍',
     text: 'Ăn nhà hay ăn ngoài?',
     options: [
@@ -21,10 +23,11 @@ export const fixedQuestions: Question[] = [
   },
   {
     id: 'q3_texture',
-    icon: '🍽️',
+    kind: 'fixed',
+    icon: '🍜',
     text: 'Món khô hay món nước?',
     options: [
-      { id: 'dry', label: 'Món khô', icon: '🍚', tags: ['dry'] },
+      { id: 'dry', label: 'Món khô', icon: '🍛', tags: ['dry'] },
       { id: 'wet', label: 'Món nước', icon: '🍜', tags: ['wet'] },
     ],
   },

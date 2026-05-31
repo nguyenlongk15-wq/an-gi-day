@@ -2,6 +2,10 @@ export type Branch = 'home_dry' | 'home_wet' | 'outside_dry' | 'outside_wet';
 
 export type ResultBranch = Branch | 'skip';
 
+export type CravingType = 'chicken' | 'beef' | 'pork' | 'fish' | 'egg' | 'tofu' | 'seafood' | 'squid' | 'shrimp';
+
+export type PreferredCraving = Exclude<CravingType, 'seafood'>;
+
 export type Food = {
   id: string;
   name: string;
@@ -21,11 +25,15 @@ export type AnswerOption = {
   icon: string;
 };
 
+export type QuestionKind = 'fixed' | 'general' | 'craving';
+
 export type Question = {
   id: string;
   text: string;
   icon: string;
   options: AnswerOption[];
+  kind?: QuestionKind;
+  cravingType?: CravingType;
 };
 
 export type QuizAnswer = {
@@ -34,7 +42,20 @@ export type QuizAnswer = {
   answerId: string;
   answerLabel: string;
   answerIcon?: string;
+  cravingType?: CravingType;
   tags: string[];
+};
+
+export type QuizState = {
+  branch: Branch | null;
+  answers: QuizAnswer[];
+  askedQuestionIds: string[];
+  askedCravings: CravingType[];
+  preferredCraving: PreferredCraving | null;
+  seafoodFollowUpMode: boolean;
+  pendingSeafoodOptions: ('squid' | 'shrimp')[];
+  generalSinceLastCraving: number;
+  currentQuestionIndex: number;
 };
 
 export type SkipMessage = {
@@ -49,6 +70,7 @@ export type FoodResultPayload = {
   food: Food;
   branch: Branch;
   answers: QuizAnswer[];
+  preferredCraving: PreferredCraving | null;
   reason: string;
   topResults: Food[];
 };

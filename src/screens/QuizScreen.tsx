@@ -6,14 +6,15 @@ import { ArrowLeft, RotateCcw } from 'lucide-react-native';
 import QuestionCard from '../components/QuestionCard';
 import ProgressBar from '../components/ProgressBar';
 import { getRandomSkipMessage } from '../data/skipMessages';
+import { getCravingBadgeText } from '../data/cravings';
 import { colors, maxContentWidth } from '../theme';
-import type { AnswerOption, Question, ResultPayload } from '../types';
+import type { AnswerOption, Question, QuizState, ResultPayload } from '../types';
 import { getBestResults } from '../utils/getBestResults';
 import { getLastShownResultIds, rememberResult } from '../utils/storage';
 import {
-  buildGameQuestions,
-  getBranchFromAnswers,
-  getInitialQuestions,
+  advanceQuizState,
+  createInitialQuizState,
+  getNextQuestion,
   toQuizAnswer,
   TOTAL_QUESTIONS,
 } from '../utils/quizEngine';
@@ -24,17 +25,16 @@ type QuizScreenProps = {
 };
 
 export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
-  const [questions, setQuestions] = useState<Question[]>(() => getInitialQuestions());
-  const [answers, setAnswers] = useState<ResultPayload['answers']>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [quizState, setQuizState] = useState<QuizState>(() => createInitialQuizState());
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(() => getNextQuestion(createInitialQuizState()));
+  const [history, setHistory] = useState<Array<{ state: QuizState; question: Question | null }>>([]);
   const [busy, setBusy] = useState(false);
 
-  const currentQuestion = questions[currentIndex];
-
   const resetQuiz = () => {
-    setQuestions(getInitialQuestions());
-    setAnswers([]);
-    setCurrentIndex(0);
+    const initialState = createInitialQuizState();
+    setQuizState(initialState);
+    setCurrentQuestion(getNextQuestion(initialState));
+    setHistory([]);
     setBusy(false);
   };
 
@@ -48,23 +48,22 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
     });
   };
 
-  const completeWithFood = async (nextAnswers: ResultPayload['answers']) => {
-    const branch = getBranchFromAnswers(nextAnswers);
-
-    if (!branch) {
+  const completeWithFood = async (nextState: QuizState) => {
+    if (!nextState.branch) {
       resetQuiz();
       return;
     }
 
     const recentIds = await getLastShownResultIds();
-    const bestResult = getBestResults(nextAnswers, branch, recentIds);
+    const bestResult = getBestResults(nextState.answers, nextState.branch, recentIds, nextState.preferredCraving);
     await rememberResult(bestResult.selected.id);
 
     onComplete({
       type: 'food',
       food: bestResult.selected,
-      branch,
-      answers: nextAnswers,
+      branch: nextState.branch,
+      answers: nextState.answers,
+      preferredCraving: nextState.preferredCraving,
       reason: bestResult.reason,
       topResults: bestResult.topResults,
     });
@@ -76,34 +75,25 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
     }
 
     setBusy(true);
-    const quizAnswer = toQuizAnswer(currentQuestion, answer);
-    const nextAnswers = [...answers, quizAnswer];
 
     try {
       if (currentQuestion.id === 'q1_eat_or_skip' && answer.id === 'skip') {
+        const quizAnswer = toQuizAnswer(currentQuestion, answer);
+        const nextAnswers = [...quizState.answers, quizAnswer];
         await completeWithSkip(nextAnswers);
         return;
       }
 
-      let nextQuestions = questions;
+      const nextState = advanceQuizState(quizState, currentQuestion, answer);
 
-      if (currentQuestion.id === 'q3_texture') {
-        const branch = getBranchFromAnswers(nextAnswers);
-
-        if (branch) {
-          nextQuestions = buildGameQuestions(branch);
-          setQuestions(nextQuestions);
-        }
-      }
-
-      setAnswers(nextAnswers);
-
-      if (nextAnswers.length >= TOTAL_QUESTIONS) {
-        await completeWithFood(nextAnswers);
+      if (nextState.currentQuestionIndex >= TOTAL_QUESTIONS) {
+        await completeWithFood(nextState);
         return;
       }
 
-      setCurrentIndex((index) => Math.min(index + 1, nextQuestions.length - 1));
+      setHistory((items) => [...items, { state: quizState, question: currentQuestion }]);
+      setQuizState(nextState);
+      setCurrentQuestion(getNextQuestion(nextState));
     } finally {
       setBusy(false);
     }
@@ -114,13 +104,15 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
       return;
     }
 
-    if (currentIndex === 0) {
+    if (history.length === 0) {
       onExit();
       return;
     }
 
-    setAnswers((currentAnswers) => currentAnswers.slice(0, -1));
-    setCurrentIndex((index) => Math.max(index - 1, 0));
+    const previous = history[history.length - 1];
+    setQuizState(previous.state);
+    setCurrentQuestion(previous.question);
+    setHistory((items) => items.slice(0, -1));
   };
 
   if (!currentQuestion) {
@@ -139,10 +131,15 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
           <HeaderButton label="Quay lại" icon={<ArrowLeft color={colors.ink} size={18} />} onPress={goBack} />
           <HeaderButton label="Làm lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={resetQuiz} />
         </View>
-        <ProgressBar current={Math.min(currentIndex + 1, TOTAL_QUESTIONS)} total={TOTAL_QUESTIONS} />
+        <ProgressBar current={Math.min(quizState.currentQuestionIndex + 1, TOTAL_QUESTIONS)} total={TOTAL_QUESTIONS} />
+        {quizState.preferredCraving ? (
+          <View style={styles.cravingBadge}>
+            <Text style={styles.cravingBadgeText}>{getCravingBadgeText(quizState.preferredCraving)}</Text>
+          </View>
+        ) : null}
         <QuestionCard
           question={currentQuestion}
-          current={Math.min(currentIndex + 1, TOTAL_QUESTIONS)}
+          current={Math.min(quizState.currentQuestionIndex + 1, TOTAL_QUESTIONS)}
           total={TOTAL_QUESTIONS}
           onAnswer={handleAnswer}
         />
@@ -194,6 +191,21 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontWeight: '800',
     fontSize: 14,
+  },
+  cravingBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(248,196,79,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(248,196,79,0.34)',
+  },
+  cravingBadgeText: {
+    color: colors.ink,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '900',
   },
   center: {
     flex: 1,

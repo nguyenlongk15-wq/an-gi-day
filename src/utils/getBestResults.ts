@@ -1,5 +1,5 @@
 import { foods } from '../data/foods';
-import type { Branch, Food, QuizAnswer } from '../types';
+import type { Branch, Food, PreferredCraving, QuizAnswer } from '../types';
 import { pickRandom, shuffle, uniqueStrings } from './random';
 
 export type BestResult = {
@@ -17,10 +17,16 @@ function getAnswerTags(answers: readonly QuizAnswer[]): string[] {
   return uniqueStrings(answers.flatMap((answer) => answer.tags));
 }
 
-function scoreFood(food: Food, answerTags: readonly string[]): ScoredFood {
+function scoreFood(food: Food, answerTags: readonly string[], preferredCraving: PreferredCraving | null): ScoredFood {
+  let score = food.tags.filter((tag) => answerTags.includes(tag)).length;
+
+  if (preferredCraving) {
+    score += food.tags.includes(preferredCraving) ? 100 : -40;
+  }
+
   return {
     food,
-    score: food.tags.filter((tag) => answerTags.includes(tag)).length,
+    score,
   };
 }
 
@@ -33,6 +39,15 @@ function buildReason(food: Food): string {
   return `${food.name} có thể là món bạn đang thèm lúc này đúng không?`;
 }
 
+function getPreferredBranchFoods(branchFoods: readonly Food[], preferredCraving: PreferredCraving | null): Food[] {
+  if (!preferredCraving) {
+    return [...branchFoods];
+  }
+
+  const preferredFoods = branchFoods.filter((food) => food.tags.includes(preferredCraving));
+  return preferredFoods.length >= 8 ? preferredFoods : [...branchFoods];
+}
+
 function chooseFromTop(topResults: readonly Food[], recentIds: readonly string[], avoidFoodId?: string): Food {
   const withoutCurrent = topResults.filter((food) => food.id !== avoidFoodId);
   const freshPool = withoutCurrent.filter((food) => !recentIds.includes(food.id));
@@ -43,10 +58,12 @@ export function getBestResults(
   answers: readonly QuizAnswer[],
   branch: Branch,
   recentIds: readonly string[] = [],
+  preferredCraving: PreferredCraving | null = null,
 ): BestResult {
   const answerTags = getAnswerTags(answers);
   const branchFoods = getBranchFoods(branch);
-  const scoredFoods = shuffle(branchFoods.map((food) => scoreFood(food, answerTags))).sort((a, b) => b.score - a.score);
+  const candidateFoods = getPreferredBranchFoods(branchFoods, preferredCraving);
+  const scoredFoods = shuffle(candidateFoods.map((food) => scoreFood(food, answerTags, preferredCraving))).sort((a, b) => b.score - a.score);
   const positiveMatches = scoredFoods.filter((item) => item.score > 0);
   const topScored = (positiveMatches.length > 0 ? positiveMatches : scoredFoods).slice(0, 10);
   const topResults = topScored.map((item) => item.food);
@@ -64,6 +81,7 @@ export function getAlternativeResult(
   topResults: readonly Food[],
   branch: Branch,
   recentIds: readonly string[] = [],
+  preferredCraving: PreferredCraving | null = null,
 ): Food {
   const topChoice = chooseFromTop(topResults, recentIds, currentFoodId);
 
@@ -71,6 +89,10 @@ export function getAlternativeResult(
     return topChoice;
   }
 
-  const fallbackPool = getBranchFoods(branch).filter((food) => food.id !== currentFoodId);
+  const branchFoods = getBranchFoods(branch);
+  const preferredFallbackPool = preferredCraving
+    ? branchFoods.filter((food) => food.tags.includes(preferredCraving) && food.id !== currentFoodId)
+    : [];
+  const fallbackPool = preferredFallbackPool.length > 0 ? preferredFallbackPool : branchFoods.filter((food) => food.id !== currentFoodId);
   return pickRandom(fallbackPool) ?? topChoice;
 }

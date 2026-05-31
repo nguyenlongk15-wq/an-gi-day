@@ -38,8 +38,10 @@ export default function QuestionCard({ question, current, total, onAnswer }: Que
     <Animated.View style={[styles.card, { opacity, transform: [{ translateY }] }]}>
       <Text style={styles.kicker}>Câu {current} trong {total}</Text>
       <View style={styles.titleRow}>
-        <View style={styles.questionIcon}>
-          <Text style={styles.questionIconText}>{question.icon || '🍽️'}</Text>
+        <View style={[styles.questionIcon, question.kind === 'craving' && styles.cravingQuestionIcon]}>
+          <Text style={[styles.questionIconText, question.kind === 'craving' && styles.cravingQuestionIconText]}>
+            {question.icon || '🍽️'}
+          </Text>
         </View>
         <Text style={styles.title}>{question.text}</Text>
       </View>
@@ -97,6 +99,16 @@ const styles = StyleSheet.create({
   questionIconText: {
     fontSize: 28,
     lineHeight: 34,
+  },
+  cravingQuestionIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: 'rgba(248,196,79,0.16)',
+  },
+  cravingQuestionIconText: {
+    fontSize: 36,
+    lineHeight: 42,
   },
   options: {
     gap: 12,

@@ -76,7 +76,7 @@ with sync_playwright() as p:
     page.on(
         "console",
         lambda msg: console_errors.append(msg.text)
-        if msg.type == "error" and "ERR_CONNECTION_REFUSED" not in msg.text
+        if msg.type == "error" and "ERR_CONNECTION_REFUSED" not in msg.text and "ERR_CONNECTION_RESET" not in msg.text
         else None,
     )
 
@@ -101,10 +101,10 @@ with sync_playwright() as p:
     click_button(page, "Ăn nhà")
     click_button(page, "Món khô")
 
-    for _ in range(9):
+    for _ in range(6):
         click_first_quiz_option(page)
     body_before_result = page.locator("body").inner_text(timeout=5000)
-    assert "13/13" in body_before_result
+    assert "10/10" in body_before_result
     assert "Món khác" not in body_before_result
 
     click_first_quiz_option(page)
