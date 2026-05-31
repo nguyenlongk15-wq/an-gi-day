@@ -4,9 +4,8 @@ import type { AnswerOption, Branch, CravingType, PreferredCraving, Question, Qui
 import { shuffle } from './random';
 
 export const FIXED_QUESTION_COUNT = fixedQuestions.length;
-export const TARGET_PROFILE_QUESTION_COUNT = 10;
+export const TARGET_USEFUL_ANSWER_COUNT = 10;
 
-const FALLBACK_PROFILE_QUESTION_COUNT = 6;
 const GENERAL_QUESTIONS_BETWEEN_CRAVINGS = 2;
 const RECENT_GENERAL_AVOID_COUNT = 5;
 
@@ -28,9 +27,10 @@ export function createInitialQuizState(): QuizState {
     preferredCraving: null,
     seafoodFollowUpMode: false,
     pendingSeafoodOptions: [],
+    generalAnswerCount: 0,
+    usefulAnswerCount: 0,
+    targetUsefulAnswerCount: TARGET_USEFUL_ANSWER_COUNT,
     generalSinceLastCraving: 0,
-    profileQuestionsAnswered: 0,
-    targetProfileQuestionCount: TARGET_PROFILE_QUESTION_COUNT,
   };
 }
 
@@ -39,7 +39,7 @@ export function getInitialQuestions(): Question[] {
 }
 
 export function buildGameQuestions(branch: Branch): Question[] {
-  return [...fixedQuestions, ...shuffle(getGeneralQuestions(branch)).slice(0, TARGET_PROFILE_QUESTION_COUNT)];
+  return [...fixedQuestions, ...shuffle(getGeneralQuestions(branch)).slice(0, TARGET_USEFUL_ANSWER_COUNT)];
 }
 
 export function getGeneralQuestions(branch: Branch): Question[] {
@@ -126,7 +126,7 @@ export function getNextQuestion(state: QuizState): Question | null {
   }
 
   if (state.phase === 'profiling') {
-    if (state.profileQuestionsAnswered >= state.targetProfileQuestionCount) {
+    if (state.usefulAnswerCount >= state.targetUsefulAnswerCount) {
       return null;
     }
 
@@ -170,17 +170,24 @@ function hasUnaskedMainCravings(askedCravings: readonly CravingType[]): boolean 
   return mainCravingTypes.some((type) => !askedCravings.includes(type));
 }
 
-function enterProfilingPhase(preferredCraving: PreferredCraving | null): Pick<
+function getUsefulAnswerCount(generalAnswerCount: number, preferredCraving: PreferredCraving | null): number {
+  return generalAnswerCount + (preferredCraving ? 1 : 0);
+}
+
+function enterProfilingPhase(
+  generalAnswerCount: number,
+  preferredCraving: PreferredCraving | null,
+): Pick<
   QuizState,
-  'phase' | 'preferredCraving' | 'seafoodFollowUpMode' | 'pendingSeafoodOptions' | 'profileQuestionsAnswered' | 'targetProfileQuestionCount'
+  'phase' | 'preferredCraving' | 'seafoodFollowUpMode' | 'pendingSeafoodOptions' | 'usefulAnswerCount' | 'targetUsefulAnswerCount'
 > {
   return {
     phase: 'profiling',
     preferredCraving,
     seafoodFollowUpMode: false,
     pendingSeafoodOptions: [],
-    profileQuestionsAnswered: 0,
-    targetProfileQuestionCount: preferredCraving ? TARGET_PROFILE_QUESTION_COUNT : FALLBACK_PROFILE_QUESTION_COUNT,
+    usefulAnswerCount: getUsefulAnswerCount(generalAnswerCount, preferredCraving),
+    targetUsefulAnswerCount: TARGET_USEFUL_ANSWER_COUNT,
   };
 }
 
@@ -209,9 +216,10 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
   let preferredCraving = state.preferredCraving;
   let seafoodFollowUpMode = state.seafoodFollowUpMode;
   let pendingSeafoodOptions = state.pendingSeafoodOptions;
+  let generalAnswerCount = state.generalAnswerCount;
+  let usefulAnswerCount = state.usefulAnswerCount;
+  let targetUsefulAnswerCount = state.targetUsefulAnswerCount;
   let generalSinceLastCraving = state.generalSinceLastCraving;
-  let profileQuestionsAnswered = state.profileQuestionsAnswered;
-  let targetProfileQuestionCount = state.targetProfileQuestionCount;
 
   if (question.id === 'q3_texture') {
     branch = getBranchFromAnswers(answers);
@@ -230,13 +238,13 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
         seafoodFollowUpMode = true;
         pendingSeafoodOptions = shuffle(seafoodCravingTypes.filter((type) => !askedCravings.includes(type)));
       } else {
-        const profiling = enterProfilingPhase(getPreferredFromCraving(cravingType));
+        const profiling = enterProfilingPhase(generalAnswerCount, getPreferredFromCraving(cravingType));
         phase = profiling.phase;
         preferredCraving = profiling.preferredCraving;
         seafoodFollowUpMode = profiling.seafoodFollowUpMode;
         pendingSeafoodOptions = profiling.pendingSeafoodOptions;
-        profileQuestionsAnswered = profiling.profileQuestionsAnswered;
-        targetProfileQuestionCount = profiling.targetProfileQuestionCount;
+        usefulAnswerCount = profiling.usefulAnswerCount;
+        targetUsefulAnswerCount = profiling.targetUsefulAnswerCount;
       }
     } else if (cravingType === 'squid' || cravingType === 'shrimp') {
       pendingSeafoodOptions = removePendingSeafood(pendingSeafoodOptions, cravingType);
@@ -247,21 +255,25 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
     }
 
     if (!preferredCraving && !seafoodFollowUpMode && !hasUnaskedMainCravings(askedCravings)) {
-      const profiling = enterProfilingPhase(null);
+      const profiling = enterProfilingPhase(generalAnswerCount, null);
       phase = profiling.phase;
       preferredCraving = profiling.preferredCraving;
       seafoodFollowUpMode = profiling.seafoodFollowUpMode;
       pendingSeafoodOptions = profiling.pendingSeafoodOptions;
-      profileQuestionsAnswered = profiling.profileQuestionsAnswered;
-      targetProfileQuestionCount = profiling.targetProfileQuestionCount;
+      usefulAnswerCount = profiling.usefulAnswerCount;
+      targetUsefulAnswerCount = profiling.targetUsefulAnswerCount;
     }
-  } else if (phase === 'profiling' && question.kind === 'general') {
-    profileQuestionsAnswered += 1;
-    if (profileQuestionsAnswered >= targetProfileQuestionCount) {
+  } else if (question.kind === 'general') {
+    generalAnswerCount += 1;
+    usefulAnswerCount = getUsefulAnswerCount(generalAnswerCount, preferredCraving);
+
+    if (phase === 'profiling' && usefulAnswerCount >= targetUsefulAnswerCount) {
       phase = 'complete';
     }
-  } else if (phase === 'finding_craving' && question.kind === 'general') {
-    generalSinceLastCraving += 1;
+
+    if (phase === 'finding_craving') {
+      generalSinceLastCraving += 1;
+    }
   }
 
   return {
@@ -276,9 +288,10 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
     preferredCraving,
     seafoodFollowUpMode,
     pendingSeafoodOptions,
+    generalAnswerCount,
+    usefulAnswerCount,
+    targetUsefulAnswerCount,
     generalSinceLastCraving,
-    profileQuestionsAnswered,
-    targetProfileQuestionCount,
   };
 }
 

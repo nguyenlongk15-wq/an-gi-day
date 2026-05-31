@@ -69,6 +69,14 @@ def click_button(page, label):
     raise AssertionError(f"Button not found: {label}")
 
 
+def assert_removed_quiz_ui(text):
+    lower = text.lower()
+    assert "đang chọn món hợp gu" not in lower
+    assert "câu gu vị" not in lower
+    assert "đang ưu tiên:" not in lower
+    assert "1/10" not in lower
+
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     page = browser.new_page(viewport={"width": 390, "height": 844})
@@ -90,7 +98,7 @@ with sync_playwright() as p:
     click_button(page, "Bắt đầu")
     first_question_body = page.locator("body").inner_text(timeout=5000)
     assert "Câu 1 trong 10" not in first_question_body
-    assert "1/10" not in first_question_body
+    assert_removed_quiz_ui(first_question_body)
     click_button(page, "Nhịn")
     wait_for_text(page, "Chọn lại", timeout=10000)
     skip_body = page.locator("body").inner_text(timeout=5000)
@@ -108,12 +116,12 @@ with sync_playwright() as p:
     for _ in range(24):
         quiz_body = page.locator("body").inner_text(timeout=5000)
         assert "Câu 1 trong 10" not in quiz_body
+        assert_removed_quiz_ui(quiz_body)
         if "Món khác" in quiz_body:
             break
-        if "Đang ưu tiên:" in quiz_body:
-            locked_craving = True
         if "Bạn có thèm" in quiz_body and not locked_craving:
             click_button(page, "Có")
+            locked_craving = True
         else:
             click_first_quiz_option(page)
 

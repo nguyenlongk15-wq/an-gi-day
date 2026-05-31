@@ -4,9 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ArrowLeft, RotateCcw } from 'lucide-react-native';
 
 import QuestionCard from '../components/QuestionCard';
-import ProgressBar from '../components/ProgressBar';
 import { getRandomSkipMessage } from '../data/skipMessages';
-import { getCravingBadgeText } from '../data/cravings';
 import { colors, maxContentWidth } from '../theme';
 import type { AnswerOption, Question, QuizState, ResultPayload } from '../types';
 import { getBestResults } from '../utils/getBestResults';
@@ -14,7 +12,6 @@ import { getLastShownResultIds, rememberResult } from '../utils/storage';
 import {
   advanceQuizState,
   createInitialQuizState,
-  FIXED_QUESTION_COUNT,
   getNextQuestion,
   isQuizComplete,
   toQuizAnswer,
@@ -24,41 +21,6 @@ type QuizScreenProps = {
   onComplete: (result: ResultPayload) => void;
   onExit: () => void;
 };
-
-type QuizProgressView = {
-  label: string;
-  detail?: string;
-  progress: number;
-  kicker: string;
-};
-
-function getQuizProgressView(state: QuizState, question: Question): QuizProgressView {
-  if (state.phase === 'fixed') {
-    const step = Math.min(state.answers.length + 1, FIXED_QUESTION_COUNT);
-    return {
-      label: `Bước ${step}`,
-      progress: step / FIXED_QUESTION_COUNT,
-      kicker: `Bước ${step}`,
-    };
-  }
-
-  if (state.phase === 'profiling') {
-    const currentProfileQuestion = Math.min(state.profileQuestionsAnswered + 1, state.targetProfileQuestionCount);
-    return {
-      label: 'Đang chọn món hợp gu...',
-      detail: `Câu gu vị ${currentProfileQuestion}/${state.targetProfileQuestionCount}`,
-      progress: Math.min((state.profileQuestionsAnswered + 0.25) / state.targetProfileQuestionCount, 1),
-      kicker: `Câu gu vị ${currentProfileQuestion}/${state.targetProfileQuestionCount}`,
-    };
-  }
-
-  const cravingProgress = Math.min(0.92, 0.25 + state.askedCravings.length * 0.06 + state.generalSinceLastCraving * 0.05);
-  return {
-    label: 'Đang dò cơn thèm...',
-    progress: cravingProgress,
-    kicker: question.kind === 'craving' ? 'Câu hỏi nguyên liệu' : 'Câu gu vị nhanh',
-  };
-}
 
 export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
   const [quizState, setQuizState] = useState<QuizState>(() => createInitialQuizState());
@@ -162,8 +124,6 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
     );
   }
 
-  const progressView = getQuizProgressView(quizState, currentQuestion);
-
   return (
     <ScrollView contentContainerStyle={styles.scroll}>
       <View style={styles.content}>
@@ -171,15 +131,8 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
           <HeaderButton label="Quay lại" icon={<ArrowLeft color={colors.ink} size={18} />} onPress={goBack} />
           <HeaderButton label="Làm lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={resetQuiz} />
         </View>
-        <ProgressBar progress={progressView.progress} label={progressView.label} detail={progressView.detail} />
-        {quizState.preferredCraving ? (
-          <View style={styles.cravingBadge}>
-            <Text style={styles.cravingBadgeText}>{getCravingBadgeText(quizState.preferredCraving)}</Text>
-          </View>
-        ) : null}
         <QuestionCard
           question={currentQuestion}
-          kicker={progressView.kicker}
           onAnswer={handleAnswer}
         />
       </View>
@@ -230,21 +183,6 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontWeight: '800',
     fontSize: 14,
-  },
-  cravingBadge: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(248,196,79,0.16)',
-    borderWidth: 1,
-    borderColor: 'rgba(248,196,79,0.34)',
-  },
-  cravingBadgeText: {
-    color: colors.ink,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '900',
   },
   center: {
     flex: 1,

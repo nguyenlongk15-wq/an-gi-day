@@ -57,9 +57,10 @@ export type QuizState = {
   preferredCraving: PreferredCraving | null;
   seafoodFollowUpMode: boolean;
   pendingSeafoodOptions: ('squid' | 'shrimp')[];
+  generalAnswerCount: number;
+  usefulAnswerCount: number;
+  targetUsefulAnswerCount: number;
   generalSinceLastCraving: number;
-  profileQuestionsAnswered: number;
-  targetProfileQuestionCount: number;
 };
 
 export type SkipMessage = {

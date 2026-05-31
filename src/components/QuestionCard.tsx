@@ -7,11 +7,10 @@ import OptionButton from './OptionButton';
 
 type QuestionCardProps = {
   question: Question;
-  kicker: string;
   onAnswer: (answer: AnswerOption) => void;
 };
 
-export default function QuestionCard({ question, kicker, onAnswer }: QuestionCardProps) {
+export default function QuestionCard({ question, onAnswer }: QuestionCardProps) {
   const opacity = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
 
@@ -35,7 +34,6 @@ export default function QuestionCard({ question, kicker, onAnswer }: QuestionCar
 
   return (
     <Animated.View style={[styles.card, { opacity, transform: [{ translateY }] }]}>
-      <Text style={styles.kicker}>{kicker}</Text>
       <View style={styles.titleRow}>
         <View style={[styles.questionIcon, question.kind === 'craving' && styles.cravingQuestionIcon]}>
           <Text style={[styles.questionIconText, question.kind === 'craving' && styles.cravingQuestionIconText]}>
@@ -68,12 +66,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     ...shadow,
-  },
-  kicker: {
-    color: colors.yellow,
-    fontSize: 13,
-    fontWeight: '800',
-    textTransform: 'uppercase',
   },
   title: {
     flex: 1,
