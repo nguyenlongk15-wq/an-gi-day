@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import FoodResultCard from '../components/FoodResultCard';
 import SkipResultCard from '../components/SkipResultCard';
-import { maxContentWidth } from '../theme';
+import { maxContentWidth, spacing } from '../theme';
 import type { FoodResultPayload, ResultPayload } from '../types';
 import { getAlternativeResult } from '../utils/getBestResults';
 import { addFavorite, getFavorites, getLastShownResultIds, rememberResult, removeFavorite } from '../utils/storage';
@@ -71,8 +71,8 @@ function FoodResultContent({ result, onRestart }: { result: FoodResultPayload; o
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
-    padding: 18,
-    paddingBottom: 42,
+    padding: spacing.xl,
+    paddingBottom: spacing.xxl,
     alignItems: 'center',
     justifyContent: 'center',
   },

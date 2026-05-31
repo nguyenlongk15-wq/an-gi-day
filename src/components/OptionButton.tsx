@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 
-import { colors } from '../theme';
+import { colors, radius, softShadow, spacing, typography } from '../theme';
 
 const vietnamFlagIcon = require('../../assets/vietnam-flag-icon.png');
 
@@ -16,6 +16,7 @@ type OptionButtonProps = {
 
 export default function OptionButton({ label, onPress, icon, tone = 'warm' }: OptionButtonProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const shouldUseVietnamFlag = icon === 'vietnam_flag' || icon === '🇻🇳' || icon?.toLowerCase() === 'vn';
 
   const handlePress = () => {
@@ -27,9 +28,12 @@ export default function OptionButton({ label, onPress, icon, tone = 'warm' }: Op
     <Pressable
       accessibilityRole="button"
       onPress={handlePress}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
       style={({ pressed }) => [
         styles.button,
         tone === 'cool' ? styles.coolButton : styles.warmButton,
+        hovered && styles.hovered,
         pressed && styles.pressed,
       ]}
     >
@@ -51,49 +55,54 @@ export default function OptionButton({ label, onPress, icon, tone = 'warm' }: Op
           {label}
         </Text>
       </View>
-      <ChevronRight color={colors.ink} size={22} strokeWidth={2.4} />
+      <ChevronRight color={colors.muted} size={22} strokeWidth={2.5} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 78,
-    borderRadius: 14,
+    minHeight: 82,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.line,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.md,
+    ...softShadow,
   },
   warmButton: {
-    backgroundColor: 'rgba(241, 91, 69, 0.20)',
+    backgroundColor: 'rgba(255, 107, 74, 0.16)',
   },
   coolButton: {
-    backgroundColor: 'rgba(103, 211, 145, 0.18)',
+    backgroundColor: 'rgba(45, 212, 168, 0.14)',
+  },
+  hovered: {
+    borderColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
   },
   pressed: {
     transform: [{ scale: 0.98 }],
-    opacity: 0.86,
+    opacity: 0.9,
   },
   left: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.md,
     minWidth: 0,
   },
   icon: {
-    width: 48,
-    height: 48,
+    width: 50,
+    height: 50,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emojiIcon: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: 'rgba(255,255,255,0.10)',
   },
   flagIcon: {
@@ -102,19 +111,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   flagImage: {
-    width: 48,
-    height: 48,
+    width: 50,
+    height: 50,
     borderRadius: 24,
   },
   iconText: {
-    fontSize: 22,
-    lineHeight: 28,
+    fontSize: 25,
+    lineHeight: 31,
   },
   label: {
     flex: 1,
     color: colors.ink,
-    fontSize: 19,
-    lineHeight: 25,
-    fontWeight: '800',
+    ...typography.option,
   },
 });

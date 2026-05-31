@@ -8,7 +8,7 @@ import FavoritesScreen from '../screens/FavoritesScreen';
 import HomeScreen from '../screens/HomeScreen';
 import QuizScreen from '../screens/QuizScreen';
 import ResultScreen from '../screens/ResultScreen';
-import { colors } from '../theme';
+import { colors, radius, spacing, typography } from '../theme';
 import type { ResultPayload, RouteName } from '../types';
 import { clearLegacyHistoryStorage } from '../utils/storage';
 
@@ -96,34 +96,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabBar: {
-    minHeight: 64,
-    borderRadius: 18,
-    padding: 8,
-    marginHorizontal: 14,
-    marginBottom: 14,
+    minHeight: 62,
+    borderRadius: radius.lg,
+    padding: spacing.xs,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
     backgroundColor: colors.panelStrong,
     borderWidth: 1,
     borderColor: colors.line,
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.xs,
   },
   tabButton: {
     flex: 1,
     minWidth: 0,
-    borderRadius: 14,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 7,
+    gap: spacing.xxs,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   tabButtonActive: {
-    backgroundColor: colors.red,
+    backgroundColor: colors.primary,
   },
   tabText: {
     color: colors.muted,
+    ...typography.label,
     fontSize: 12,
-    fontWeight: '800',
+    lineHeight: 16,
   },
   tabTextActive: {
     color: colors.ink,

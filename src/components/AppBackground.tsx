@@ -3,6 +3,8 @@ import { memo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import type { ImageStyle, ViewStyle } from 'react-native';
 
+import { colors } from '../theme';
+
 const foodBackground = require('../../assets/backgrounds/food-bg.png');
 const fallbackAbsoluteFill = {
   position: 'absolute',
@@ -36,7 +38,7 @@ export default memo(AppBackground);
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#061014',
+    backgroundColor: colors.backgroundDark,
     overflow: 'hidden',
   },
   backgroundLayer: {
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.38)',
   },
   content: {
     flex: 1,

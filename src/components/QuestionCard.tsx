@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { AnswerOption, Question } from '../types';
-import { colors, shadow } from '../theme';
+import { colors, radius, shadow, spacing, typography } from '../theme';
 import OptionButton from './OptionButton';
 
 type QuestionCardProps = {
@@ -11,6 +11,8 @@ type QuestionCardProps = {
 };
 
 export default function QuestionCard({ question, onAnswer }: QuestionCardProps) {
+  const { width } = useWindowDimensions();
+  const compact = width < 520;
   const opacity = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
 
@@ -33,14 +35,14 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
   }, [opacity, question.id, translateY]);
 
   return (
-    <Animated.View style={[styles.card, { opacity, transform: [{ translateY }] }]}>
+    <Animated.View style={[styles.card, compact && styles.compactCard, { opacity, transform: [{ translateY }] }]}>
       <View style={styles.titleRow}>
         <View style={[styles.questionIcon, question.kind === 'craving' && styles.cravingQuestionIcon]}>
           <Text style={[styles.questionIconText, question.kind === 'craving' && styles.cravingQuestionIconText]}>
             {question.icon || '🍽️'}
           </Text>
         </View>
-        <Text style={styles.title}>{question.text}</Text>
+        <Text style={[styles.title, compact && styles.compactTitle]}>{question.text}</Text>
       </View>
       <View style={styles.options}>
         {question.options.map((answer, index) => (
@@ -59,49 +61,56 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 8,
-    padding: 20,
-    gap: 18,
+    borderRadius: radius.xl,
+    padding: spacing.xxl,
+    gap: spacing.xl,
     backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.line,
     ...shadow,
   },
+  compactCard: {
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    gap: spacing.lg,
+  },
   title: {
     flex: 1,
     color: colors.ink,
-    fontSize: 30,
-    lineHeight: 38,
-    fontWeight: '900',
+    ...typography.questionTitle,
+  },
+  compactTitle: {
+    fontSize: 25,
+    lineHeight: 32,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: spacing.md,
   },
   questionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
+    width: 60,
+    height: 60,
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.10)',
   },
   questionIconText: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 31,
+    lineHeight: 38,
   },
   cravingQuestionIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 22,
-    backgroundColor: 'rgba(248,196,79,0.16)',
+    width: 68,
+    height: 68,
+    borderRadius: radius.xl,
+    backgroundColor: 'rgba(255,184,77,0.16)',
   },
   cravingQuestionIconText: {
-    fontSize: 36,
-    lineHeight: 42,
+    fontSize: 38,
+    lineHeight: 44,
   },
   options: {
-    gap: 12,
+    gap: spacing.md,
   },
 });

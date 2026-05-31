@@ -5,7 +5,7 @@ import { ArrowLeft, RotateCcw } from 'lucide-react-native';
 
 import QuestionCard from '../components/QuestionCard';
 import { getRandomSkipMessage } from '../data/skipMessages';
-import { colors, maxContentWidth } from '../theme';
+import { colors, maxContentWidth, radius, spacing, typography } from '../theme';
 import type { AnswerOption, Question, QuizState, ResultPayload } from '../types';
 import { getBestResults } from '../utils/getBestResults';
 import { getLastShownResultIds, rememberResult } from '../utils/storage';
@@ -152,49 +152,50 @@ function HeaderButton({ label, icon, onPress }: { label: string; icon: ReactNode
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
-    padding: 18,
-    paddingBottom: 42,
+    padding: spacing.xl,
+    paddingBottom: spacing.xxl,
     alignItems: 'center',
     justifyContent: 'center',
   },
   content: {
     width: '100%',
     maxWidth: maxContentWidth,
-    gap: 18,
+    gap: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: spacing.sm,
   },
   headerButton: {
     minHeight: 42,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     backgroundColor: 'rgba(255,255,255,0.10)',
     borderWidth: 1,
     borderColor: colors.line,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.xs,
   },
   headerButtonText: {
     color: colors.ink,
-    fontWeight: '800',
+    ...typography.button,
     fontSize: 14,
+    lineHeight: 20,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
-    padding: 18,
+    gap: spacing.md,
+    padding: spacing.lg,
   },
   error: {
     color: colors.ink,
+    ...typography.button,
     fontSize: 18,
-    fontWeight: '800',
   },
   pressed: {
     opacity: 0.82,

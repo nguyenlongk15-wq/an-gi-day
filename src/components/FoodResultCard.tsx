@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Heart, RotateCcw, Shuffle, Sparkles, Trash2 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import type { Food } from '../types';
-import { colors, shadow } from '../theme';
+import { colors, primaryShadow, radius, shadow, spacing, typography } from '../theme';
 
 type FoodResultCardProps = {
   food: Food;
@@ -15,6 +17,35 @@ type FoodResultCardProps = {
   onRestart: () => void;
 };
 
+const tagLabels: Record<string, string> = {
+  chicken: 'Gà',
+  beef: 'Bò',
+  pork: 'Heo',
+  fish: 'Cá',
+  egg: 'Trứng',
+  tofu: 'Đậu hũ',
+  squid: 'Mực',
+  shrimp: 'Tôm',
+  seafood: 'Hải sản',
+  rice: 'Cơm',
+  noodle: 'Mì/Bún',
+  spicy: 'Cay',
+  mild: 'Dịu vị',
+  filling: 'No lâu',
+  light: 'Nhẹ bụng',
+  crispy: 'Giòn',
+  rich: 'Đậm vị',
+  quick: 'Nhanh gọn',
+};
+
+function getDisplayTags(food: Food): string[] {
+  return food.tags
+    .map((tag) => tagLabels[tag])
+    .filter((label): label is string => Boolean(label))
+    .filter((label, index, items) => items.indexOf(label) === index)
+    .slice(0, 4);
+}
+
 export default function FoodResultCard({
   food,
   reason,
@@ -24,13 +55,66 @@ export default function FoodResultCard({
   onToggleFavorite,
   onRestart,
 }: FoodResultCardProps) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(16)).current;
+  const heartScale = useRef(new Animated.Value(1)).current;
+  const displayTags = useMemo(() => getDisplayTags(food), [food]);
+
+  useEffect(() => {
+    opacity.setValue(0);
+    translateY.setValue(16);
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: false,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: false,
+        tension: 90,
+        friction: 13,
+      }),
+    ]).start();
+  }, [food.id, opacity, translateY]);
+
+  useEffect(() => {
+    if (!isFavorite) {
+      return;
+    }
+
+    Animated.sequence([
+      Animated.timing(heartScale, {
+        toValue: 1.14,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.spring(heartScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 4,
+      }),
+    ]).start();
+  }, [heartScale, isFavorite]);
+
   return (
-    <View style={styles.card}>
+    <Animated.View style={[styles.card, { opacity, transform: [{ translateY }] }]}>
       <View style={styles.emojiWrap}>
         <Text style={styles.emoji}>{food.emoji}</Text>
       </View>
       <Text style={styles.name}>{food.name}</Text>
       <Text style={styles.description}>{food.description}</Text>
+
+      {displayTags.length > 0 && !isSkip ? (
+        <View style={styles.tagRow}>
+          {displayTags.map((tag) => (
+            <View key={tag} style={styles.tagPill}>
+              <Text style={styles.tagText}>{tag}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
       <View style={styles.reasonBox}>
         <Sparkles color={colors.yellow} size={18} />
         <Text style={styles.reason}>{reason}</Text>
@@ -44,24 +128,27 @@ export default function FoodResultCard({
 
       <View style={styles.actions}>
         {onAlternative && !isSkip ? (
-          <ActionButton label="Món khác" icon={<Shuffle color={colors.ink} size={18} />} onPress={onAlternative} />
+          <ActionButton variant="primary" label="Món khác" icon={<Shuffle color={colors.ink} size={18} />} onPress={onAlternative} />
         ) : null}
         {onToggleFavorite && !isSkip ? (
           <ActionButton
+            variant="secondary"
             label={isFavorite ? 'Bỏ lưu' : 'Lưu yêu thích'}
             icon={
-              isFavorite ? (
-                <Trash2 color={colors.ink} size={18} />
-              ) : (
-                <Heart color={colors.ink} size={18} fill="rgba(255,255,255,0.18)" />
-              )
+              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                {isFavorite ? (
+                  <Trash2 color={colors.ink} size={18} />
+                ) : (
+                  <Heart color={colors.ink} size={18} fill="rgba(255,255,255,0.18)" />
+                )}
+              </Animated.View>
             }
             onPress={onToggleFavorite}
           />
         ) : null}
-        <ActionButton label="Chọn lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={onRestart} />
+        <ActionButton variant="secondary" label="Chọn lại" icon={<RotateCcw color={colors.ink} size={18} />} onPress={onRestart} />
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -75,114 +162,185 @@ function Meta({ icon, label, value }: { icon: ReactNode; label: string; value: s
   );
 }
 
-function ActionButton({ icon, label, onPress }: { icon: ReactNode; label: string; onPress: () => void }) {
+function ActionButton({
+  icon,
+  label,
+  onPress,
+  variant,
+}: {
+  icon: ReactNode;
+  label: string;
+  onPress: () => void;
+  variant: 'primary' | 'secondary';
+}) {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
-      {icon}
-      <Text numberOfLines={1} adjustsFontSizeToFit style={styles.actionText}>
-        {label}
-      </Text>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={({ pressed }) => [styles.actionButtonBase, pressed && styles.pressed]}
+    >
+      {variant === 'primary' ? (
+        <LinearGradient colors={[colors.primary, '#FF8A5B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.actionInner, styles.primaryAction, hovered && styles.primaryHover]}>
+          {icon}
+          <Text numberOfLines={1} adjustsFontSizeToFit style={styles.actionText}>
+            {label}
+          </Text>
+        </LinearGradient>
+      ) : (
+        <View style={[styles.actionInner, styles.secondaryAction, hovered && styles.secondaryHover]}>
+          {icon}
+          <Text numberOfLines={1} adjustsFontSizeToFit style={styles.actionText}>
+            {label}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 8,
-    padding: 20,
-    gap: 14,
+    borderRadius: radius.xxl,
+    padding: spacing.xxl,
+    gap: spacing.md,
     backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.line,
     ...shadow,
   },
   emojiWrap: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1,
+    borderColor: colors.line,
   },
   emoji: {
-    fontSize: 52,
+    fontSize: 58,
+    lineHeight: 70,
   },
   name: {
     color: colors.ink,
+    ...typography.screenTitle,
     fontSize: 34,
-    lineHeight: 40,
-    fontWeight: '900',
+    lineHeight: 42,
   },
   description: {
     color: colors.muted,
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
+    ...typography.description,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  tagPill: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  tagText: {
+    color: colors.ink,
+    ...typography.label,
+    fontSize: 12,
+    lineHeight: 17,
   },
   reasonBox: {
     flexDirection: 'row',
-    gap: 10,
-    padding: 14,
-    borderRadius: 8,
-    backgroundColor: 'rgba(248,196,79,0.12)',
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(255,184,77,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(248,196,79,0.22)',
+    borderColor: 'rgba(255,184,77,0.24)',
   },
   reason: {
     flex: 1,
     color: colors.ink,
-    fontSize: 15,
+    ...typography.label,
+    fontSize: 14,
     lineHeight: 22,
-    fontWeight: '700',
   },
   metaGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: spacing.sm,
   },
   metaItem: {
     flexGrow: 1,
     minWidth: 150,
-    gap: 5,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    gap: spacing.xxs,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.cardGlass,
+    borderWidth: 1,
+    borderColor: colors.line,
   },
   metaLabel: {
-    color: colors.muted,
+    color: colors.textMuted,
+    ...typography.label,
     fontSize: 12,
-    fontWeight: '800',
     textTransform: 'uppercase',
   },
   metaValue: {
     color: colors.ink,
+    ...typography.button,
     fontSize: 15,
-    fontWeight: '800',
   },
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: spacing.sm,
   },
-  actionButton: {
-    minHeight: 48,
+  actionButtonBase: {
+    minHeight: 54,
     flexGrow: 1,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: colors.red,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+  },
+  actionInner: {
+    minHeight: 54,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: spacing.xs,
+  },
+  primaryAction: {
+    ...primaryShadow,
+  },
+  primaryHover: {
+    opacity: 0.96,
+  },
+  secondaryAction: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  secondaryHover: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: colors.lineStrong,
   },
   actionText: {
     color: colors.ink,
+    ...typography.button,
     fontSize: 15,
-    fontWeight: '900',
+    lineHeight: 20,
   },
   pressed: {
-    opacity: 0.82,
+    opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
 });
