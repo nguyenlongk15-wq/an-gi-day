@@ -661,28 +661,32 @@ function inferTags(name: string, branch: Branch): string[] {
 function getEmoji(name: string, tags: readonly string[], branch: Branch): string {
   const lower = name.toLowerCase();
 
+  if (includesAny(lower, ['bún đậu'])) return '🍱';
   if (includesAny(lower, ['bánh mì', 'hotdog'])) return '🥖';
+  if (includesAny(lower, ['lẩu', 'shabu', 'oden'])) return '🍲';
+  if (tags.includes('rice') || includesAny(lower, ['cơm', 'xôi', 'niêu'])) return '🍚';
   if (includesAny(lower, ['pizza'])) return '🍕';
   if (includesAny(lower, ['burger'])) return '🍔';
   if (includesAny(lower, ['sushi', 'kimbap', 'cơm cuộn'])) return '🍣';
   if (includesAny(lower, ['salad', 'gỏi cuốn', 'gỏi'])) return '🥗';
+  if (includesAny(lower, ['nướng'])) return '🔥';
+  if (includesAny(lower, ['chiên', 'rán', 'giòn', 'tempura'])) return '🍤';
+  if (includesAny(lower, ['canh', 'cháo', 'súp'])) return '🍲';
   if (includesAny(lower, ['steak', 'bò né', 'bò lúc lắc', 'bò áp chảo'])) return '🥩';
   if (includesAny(lower, ['gà rán', 'gà chiên giòn', 'cánh gà', 'gà chiên'])) return '🍗';
   if (includesAny(lower, ['trứng'])) return '🍳';
   if (includesAny(lower, ['đậu hũ', 'rau', 'cải', 'nấm', 'su su', 'bắp', 'cà tím', 'khổ qua'])) return '🥬';
-  if (includesAny(lower, ['canh', 'súp', 'lẩu', 'shabu', 'oden'])) return '🍲';
   if (includesAny(lower, ['phở', 'bún', 'mì', 'mỳ', 'miến', 'hủ tiếu', 'ramen', 'udon', 'soba', 'nui', 'bánh canh', 'bánh đa', 'hoành thánh', 'malatang', 'laksa', 'tomyum'])) return '🍜';
 
   if (tags.includes('hotpot')) return '🍲';
-  if (tags.includes('rice')) return '🍚';
-  if (tags.includes('noodle')) return '🍜';
+  if (tags.includes('fried')) return '🍤';
   if (tags.includes('seafood')) return '🦐';
+  if (tags.includes('noodle')) return '🍜';
   if (tags.includes('chicken')) return '🍗';
   if (tags.includes('beef') || tags.includes('meat')) return '🥩';
   if (tags.includes('egg_tofu')) return '🍳';
   if (tags.includes('vegetable')) return '🥬';
-  if (tags.includes('fried')) return '🍤';
-  return branch.endsWith('wet') ? '🥣' : '🍽️';
+  return branch.endsWith('wet') ? '🍲' : '🍽️';
 }
 
 function getEstimatedPrice(tags: readonly string[], branch: Branch): string {

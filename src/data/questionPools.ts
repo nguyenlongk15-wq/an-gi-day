@@ -281,12 +281,12 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: 'home_wet_meat_color',
-      icon: '🥩',
-      text: 'Muốn thịt đỏ hay thịt trắng?',
+      id: 'home_wet_broth_mood',
+      icon: '🍲',
+      text: 'Muốn món nước thanh nhẹ hay đậm đà?',
       options: [
-        { id: 'red_meat', label: 'Bò/Heo', icon: '🥩', tags: ['meat', 'beef', 'filling'] },
-        { id: 'white_meat', label: 'Gà', icon: '🐔', tags: ['chicken', 'mild'] },
+        { id: 'gentle_broth', label: 'Thanh nhẹ', icon: '🌿', tags: ['clear_broth', 'light', 'mild'] },
+        { id: 'bold_broth', label: 'Đậm đà', icon: '🧂', tags: ['rich', 'saucy', 'filling'] },
       ],
     },
     {
