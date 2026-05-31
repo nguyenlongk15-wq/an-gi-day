@@ -3,7 +3,12 @@ import { branchQuestionPools, fixedQuestions } from '../data/questionPools';
 import type { AnswerOption, Branch, CravingType, PreferredCraving, Question, QuizAnswer, QuizState } from '../types';
 import { shuffle } from './random';
 
-export const TOTAL_QUESTIONS = 10;
+export const FIXED_QUESTION_COUNT = fixedQuestions.length;
+export const TARGET_PROFILE_QUESTION_COUNT = 10;
+
+const FALLBACK_PROFILE_QUESTION_COUNT = 6;
+const GENERAL_QUESTIONS_BETWEEN_CRAVINGS = 2;
+const RECENT_GENERAL_AVOID_COUNT = 5;
 
 const EXCLUDED_GENERAL_QUESTION_IDS = new Set([
   'home_dry_main_ingredient',
@@ -16,6 +21,7 @@ const EXCLUDED_GENERAL_QUESTION_IDS = new Set([
 export function createInitialQuizState(): QuizState {
   return {
     branch: null,
+    phase: 'fixed',
     answers: [],
     askedQuestionIds: [],
     askedCravings: [],
@@ -23,7 +29,8 @@ export function createInitialQuizState(): QuizState {
     seafoodFollowUpMode: false,
     pendingSeafoodOptions: [],
     generalSinceLastCraving: 0,
-    currentQuestionIndex: 0,
+    profileQuestionsAnswered: 0,
+    targetProfileQuestionCount: TARGET_PROFILE_QUESTION_COUNT,
   };
 }
 
@@ -32,7 +39,7 @@ export function getInitialQuestions(): Question[] {
 }
 
 export function buildGameQuestions(branch: Branch): Question[] {
-  return [...fixedQuestions, ...shuffle(getGeneralQuestions(branch)).slice(0, TOTAL_QUESTIONS - fixedQuestions.length)];
+  return [...fixedQuestions, ...shuffle(getGeneralQuestions(branch)).slice(0, TARGET_PROFILE_QUESTION_COUNT)];
 }
 
 export function getGeneralQuestions(branch: Branch): Question[] {
@@ -58,7 +65,16 @@ function getAvailableGeneralQuestions(state: QuizState): Question[] {
     return [];
   }
 
-  return getGeneralQuestions(state.branch).filter((question) => !state.askedQuestionIds.includes(question.id));
+  const questions = getGeneralQuestions(state.branch);
+  const unanswered = questions.filter((question) => !state.askedQuestionIds.includes(question.id));
+
+  if (unanswered.length > 0) {
+    return unanswered;
+  }
+
+  const recentQuestionIds = state.answers.slice(-RECENT_GENERAL_AVOID_COUNT).map((answer) => answer.questionId);
+  const notRecent = questions.filter((question) => !recentQuestionIds.includes(question.id));
+  return notRecent.length > 0 ? notRecent : questions;
 }
 
 function getAvailableMainCravings(state: QuizState): CravingType[] {
@@ -70,12 +86,11 @@ function getPendingSeafoodCravings(state: QuizState): PreferredCraving[] {
 }
 
 function shouldAskCravingQuestion(state: QuizState): boolean {
-  if (state.preferredCraving) {
+  if (state.phase !== 'finding_craving' || state.preferredCraving) {
     return false;
   }
 
-  const availableCravings = getAvailableMainCravings(state);
-  if (availableCravings.length === 0) {
+  if (getAvailableMainCravings(state).length === 0) {
     return false;
   }
 
@@ -84,12 +99,7 @@ function shouldAskCravingQuestion(state: QuizState): boolean {
     return false;
   }
 
-  const hasAskedCravingAfterBranch = state.askedCravings.length > 0;
-  if (!hasAskedCravingAfterBranch && state.currentQuestionIndex >= fixedQuestions.length) {
-    return true;
-  }
-
-  return state.generalSinceLastCraving >= 3;
+  return state.askedCravings.length === 0 || state.generalSinceLastCraving >= GENERAL_QUESTIONS_BETWEEN_CRAVINGS;
 }
 
 function pickNextGeneralQuestion(state: QuizState): Question | null {
@@ -107,12 +117,20 @@ function pickNextSeafoodQuestion(state: QuizState): Question | null {
 }
 
 export function getNextQuestion(state: QuizState): Question | null {
-  if (state.currentQuestionIndex >= TOTAL_QUESTIONS) {
+  if (state.phase === 'complete') {
     return null;
   }
 
-  if (state.currentQuestionIndex < fixedQuestions.length) {
-    return fixedQuestions[state.currentQuestionIndex];
+  if (state.phase === 'fixed') {
+    return fixedQuestions[state.answers.length] ?? null;
+  }
+
+  if (state.phase === 'profiling') {
+    if (state.profileQuestionsAnswered >= state.targetProfileQuestionCount) {
+      return null;
+    }
+
+    return pickNextGeneralQuestion(state);
   }
 
   if (state.seafoodFollowUpMode && !state.preferredCraving) {
@@ -148,6 +166,28 @@ function removePendingSeafood(items: readonly ('squid' | 'shrimp')[], type: Crav
   return items.filter((item) => item !== type);
 }
 
+function hasUnaskedMainCravings(askedCravings: readonly CravingType[]): boolean {
+  return mainCravingTypes.some((type) => !askedCravings.includes(type));
+}
+
+function enterProfilingPhase(preferredCraving: PreferredCraving | null): Pick<
+  QuizState,
+  'phase' | 'preferredCraving' | 'seafoodFollowUpMode' | 'pendingSeafoodOptions' | 'profileQuestionsAnswered' | 'targetProfileQuestionCount'
+> {
+  return {
+    phase: 'profiling',
+    preferredCraving,
+    seafoodFollowUpMode: false,
+    pendingSeafoodOptions: [],
+    profileQuestionsAnswered: 0,
+    targetProfileQuestionCount: preferredCraving ? TARGET_PROFILE_QUESTION_COUNT : FALLBACK_PROFILE_QUESTION_COUNT,
+  };
+}
+
+export function isQuizComplete(state: QuizState): boolean {
+  return state.phase === 'complete';
+}
+
 export function toQuizAnswer(question: Question, answer: AnswerOption): QuizAnswer {
   return {
     questionId: question.id,
@@ -164,14 +204,19 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
   const quizAnswer = toQuizAnswer(question, answer);
   const answers = [...state.answers, quizAnswer];
   let branch = state.branch;
+  let phase = state.phase;
   let askedCravings = state.askedCravings;
   let preferredCraving = state.preferredCraving;
   let seafoodFollowUpMode = state.seafoodFollowUpMode;
   let pendingSeafoodOptions = state.pendingSeafoodOptions;
   let generalSinceLastCraving = state.generalSinceLastCraving;
+  let profileQuestionsAnswered = state.profileQuestionsAnswered;
+  let targetProfileQuestionCount = state.targetProfileQuestionCount;
 
   if (question.id === 'q3_texture') {
     branch = getBranchFromAnswers(answers);
+    phase = 'finding_craving';
+    generalSinceLastCraving = GENERAL_QUESTIONS_BETWEEN_CRAVINGS;
   }
 
   if (question.kind === 'craving' && question.cravingType) {
@@ -181,12 +226,17 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
 
     if (answer.id === 'yes') {
       if (cravingType === 'seafood') {
+        phase = 'finding_craving';
         seafoodFollowUpMode = true;
-        pendingSeafoodOptions = shuffle(seafoodCravingTypes);
+        pendingSeafoodOptions = shuffle(seafoodCravingTypes.filter((type) => !askedCravings.includes(type)));
       } else {
-        preferredCraving = getPreferredFromCraving(cravingType);
-        seafoodFollowUpMode = false;
-        pendingSeafoodOptions = [];
+        const profiling = enterProfilingPhase(getPreferredFromCraving(cravingType));
+        phase = profiling.phase;
+        preferredCraving = profiling.preferredCraving;
+        seafoodFollowUpMode = profiling.seafoodFollowUpMode;
+        pendingSeafoodOptions = profiling.pendingSeafoodOptions;
+        profileQuestionsAnswered = profiling.profileQuestionsAnswered;
+        targetProfileQuestionCount = profiling.targetProfileQuestionCount;
       }
     } else if (cravingType === 'squid' || cravingType === 'shrimp') {
       pendingSeafoodOptions = removePendingSeafood(pendingSeafoodOptions, cravingType);
@@ -195,13 +245,29 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
       seafoodFollowUpMode = false;
       pendingSeafoodOptions = [];
     }
-  } else if (state.currentQuestionIndex >= fixedQuestions.length) {
+
+    if (!preferredCraving && !seafoodFollowUpMode && !hasUnaskedMainCravings(askedCravings)) {
+      const profiling = enterProfilingPhase(null);
+      phase = profiling.phase;
+      preferredCraving = profiling.preferredCraving;
+      seafoodFollowUpMode = profiling.seafoodFollowUpMode;
+      pendingSeafoodOptions = profiling.pendingSeafoodOptions;
+      profileQuestionsAnswered = profiling.profileQuestionsAnswered;
+      targetProfileQuestionCount = profiling.targetProfileQuestionCount;
+    }
+  } else if (phase === 'profiling' && question.kind === 'general') {
+    profileQuestionsAnswered += 1;
+    if (profileQuestionsAnswered >= targetProfileQuestionCount) {
+      phase = 'complete';
+    }
+  } else if (phase === 'finding_craving' && question.kind === 'general') {
     generalSinceLastCraving += 1;
   }
 
   return {
     ...state,
     branch,
+    phase,
     answers,
     askedQuestionIds: state.askedQuestionIds.includes(question.id)
       ? state.askedQuestionIds
@@ -211,7 +277,8 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
     seafoodFollowUpMode,
     pendingSeafoodOptions,
     generalSinceLastCraving,
-    currentQuestionIndex: state.currentQuestionIndex + 1,
+    profileQuestionsAnswered,
+    targetProfileQuestionCount,
   };
 }
 

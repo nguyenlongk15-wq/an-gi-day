@@ -10,19 +10,19 @@ type CravingConfig = {
 export const cravingConfigs: Record<CravingType, CravingConfig> = {
   chicken: {
     type: 'chicken',
-    label: 'Thịt gà',
+    label: 'Gà',
     icon: '🍗',
     question: 'Bạn có thèm thịt gà không?',
   },
   beef: {
     type: 'beef',
-    label: 'Thịt bò',
+    label: 'Bò',
     icon: '🥩',
     question: 'Bạn có thèm thịt bò không?',
   },
   pork: {
     type: 'pork',
-    label: 'Thịt heo',
+    label: 'Heo',
     icon: '🐷',
     question: 'Bạn có thèm thịt heo không?',
   },

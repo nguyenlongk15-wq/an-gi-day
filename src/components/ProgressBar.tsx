@@ -3,21 +3,23 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme';
 
 type ProgressBarProps = {
-  current: number;
-  total: number;
+  progress: number;
+  label: string;
+  detail?: string;
 };
 
-export default function ProgressBar({ current, total }: ProgressBarProps) {
-  const progress = Math.min(Math.max(current / total, 0), 1);
+export default function ProgressBar({ progress, label, detail }: ProgressBarProps) {
+  const clampedProgress = Math.min(Math.max(progress, 0), 1);
 
   return (
     <View style={styles.wrap}>
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${progress * 100}%` }]} />
+        <View style={[styles.fill, { width: `${clampedProgress * 100}%` }]} />
       </View>
-      <Text style={styles.text}>
-        {current}/{total}
-      </Text>
+      <View style={styles.labelRow}>
+        <Text style={styles.text}>{label}</Text>
+        {detail ? <Text style={styles.detail}>{detail}</Text> : null}
+      </View>
     </View>
   );
 }
@@ -41,6 +43,17 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 13,
     fontWeight: '700',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  detail: {
+    color: colors.ink,
+    fontSize: 13,
+    fontWeight: '800',
     textAlign: 'right',
   },
 });

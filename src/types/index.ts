@@ -6,6 +6,8 @@ export type CravingType = 'chicken' | 'beef' | 'pork' | 'fish' | 'egg' | 'tofu' 
 
 export type PreferredCraving = Exclude<CravingType, 'seafood'>;
 
+export type QuizPhase = 'fixed' | 'finding_craving' | 'profiling' | 'complete';
+
 export type Food = {
   id: string;
   name: string;
@@ -48,6 +50,7 @@ export type QuizAnswer = {
 
 export type QuizState = {
   branch: Branch | null;
+  phase: QuizPhase;
   answers: QuizAnswer[];
   askedQuestionIds: string[];
   askedCravings: CravingType[];
@@ -55,7 +58,8 @@ export type QuizState = {
   seafoodFollowUpMode: boolean;
   pendingSeafoodOptions: ('squid' | 'shrimp')[];
   generalSinceLastCraving: number;
-  currentQuestionIndex: number;
+  profileQuestionsAnswered: number;
+  targetProfileQuestionCount: number;
 };
 
 export type SkipMessage = {

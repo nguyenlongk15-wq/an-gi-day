@@ -88,6 +88,9 @@ with sync_playwright() as p:
     page.screenshot(path=str(ROOT / "web-smoke-home.png"), full_page=True)
 
     click_button(page, "Bắt đầu")
+    first_question_body = page.locator("body").inner_text(timeout=5000)
+    assert "Câu 1 trong 10" not in first_question_body
+    assert "1/10" not in first_question_body
     click_button(page, "Nhịn")
     wait_for_text(page, "Chọn lại", timeout=10000)
     skip_body = page.locator("body").inner_text(timeout=5000)
@@ -101,15 +104,20 @@ with sync_playwright() as p:
     click_button(page, "Ăn nhà")
     click_button(page, "Món khô")
 
-    for _ in range(6):
-        click_first_quiz_option(page)
-    body_before_result = page.locator("body").inner_text(timeout=5000)
-    assert "10/10" in body_before_result
-    assert "Món khác" not in body_before_result
+    locked_craving = False
+    for _ in range(24):
+        quiz_body = page.locator("body").inner_text(timeout=5000)
+        assert "Câu 1 trong 10" not in quiz_body
+        if "Món khác" in quiz_body:
+            break
+        if "Đang ưu tiên:" in quiz_body:
+            locked_craving = True
+        if "Bạn có thèm" in quiz_body and not locked_craving:
+            click_button(page, "Có")
+        else:
+            click_first_quiz_option(page)
 
-    click_first_quiz_option(page)
-
-    wait_for_text(page, "Món khác", timeout=10000)
+    wait_for_text(page, "Món khác", timeout=30000)
     result_body = page.locator("body").inner_text(timeout=5000)
     assert "Giá" not in result_body
     assert "Thời gian" not in result_body
