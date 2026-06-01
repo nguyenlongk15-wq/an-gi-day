@@ -49,24 +49,22 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
             </View>
 
             <View style={[styles.titleBlock, tight && styles.tightTitleBlock]}>
-              <View style={styles.titleTopLine}>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.86}
-                  style={[styles.titleEat, titleGlow.eat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
-                >
-                  Ăn
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.9}
-                  style={[styles.titleConnector, titleGlow.connector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
-                >
-                  hay
-                </Text>
-              </View>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.86}
+                style={[styles.titleEat, titleGlow.eat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
+              >
+                Ăn
+              </Text>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.9}
+                style={[styles.titleConnector, titleGlow.connector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
+              >
+                hay
+              </Text>
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -230,65 +228,61 @@ const styles = StyleSheet.create({
   titleBlock: {
     alignSelf: 'center',
     alignItems: 'center',
-    gap: 0,
+    gap: 2,
     minWidth: 0,
+    paddingTop: 4,
   },
   tightTitleBlock: {
-    gap: 1,
-  },
-  titleTopLine: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    minWidth: 0,
+    gap: 0,
   },
   titleEat: {
     color: '#FF7A4F',
     fontFamily: typography.hero.fontFamily,
-    fontSize: 56,
+    fontSize: 54,
     lineHeight: 62,
     fontWeight: '800',
     letterSpacing: 0.2,
+    paddingTop: 4,
   },
   compactTitleEat: {
-    fontSize: 48,
-    lineHeight: 53,
+    fontSize: 46,
+    lineHeight: 54,
   },
   tightTitleEat: {
-    fontSize: 42,
-    lineHeight: 47,
+    fontSize: 40,
+    lineHeight: 48,
   },
   titleConnector: {
     color: 'rgba(255,255,255,0.74)',
     fontFamily: typography.button.fontFamily,
-    fontSize: 24,
-    lineHeight: 31,
+    fontSize: 21,
+    lineHeight: 25,
     fontWeight: '700',
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
   },
   compactTitleConnector: {
-    fontSize: 20,
-    lineHeight: 27,
+    fontSize: 18,
+    lineHeight: 22,
   },
   tightTitleConnector: {
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 20,
   },
   titleSkip: {
     color: '#4BE3D1',
     fontFamily: typography.hero.fontFamily,
-    fontSize: 62,
+    fontSize: 60,
     lineHeight: 68,
     fontWeight: '800',
     letterSpacing: 0.15,
+    paddingTop: 2,
   },
   compactTitleSkip: {
-    fontSize: 52,
+    fontSize: 50,
     lineHeight: 58,
   },
   tightTitleSkip: {
-    fontSize: 45,
+    fontSize: 43,
     lineHeight: 50,
   },
   slogan: {
