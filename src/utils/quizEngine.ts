@@ -125,7 +125,7 @@ function getAvailableHomeWetVegetableCravings(state: QuizState): VegetableCravin
 
   return (Object.keys(homeWetVegetableConfigs) as VegetableCraving[]).filter((type) => {
     const config = homeWetVegetableConfigs[type];
-    const matchesGroup = state.vegetableGroup === 'any' || state.vegetableGroup === config.group;
+    const matchesGroup = state.vegetableGroup === config.group;
     return matchesGroup && !state.askedVegetableCravings.includes(type);
   });
 }
@@ -344,7 +344,7 @@ export function toQuizAnswer(question: Question, answer: AnswerOption): QuizAnsw
     cravingType: question.cravingType,
     foodType: question.foodType,
     vegetableCraving: question.vegetableCraving,
-    vegetableGroup: question.kind === 'vegetable_group' ? (answer.id as QuizAnswer['vegetableGroup']) : question.vegetableGroup,
+    vegetableGroup: question.kind === 'vegetable_group' && (answer.id === 'leafy' || answer.id === 'root') ? answer.id : question.vegetableGroup,
     tags: answer.tags,
   };
 }
@@ -396,7 +396,7 @@ export function advanceQuizState(state: QuizState, question: Question, answer: A
       }
     }
   } else if (question.kind === 'vegetable_group') {
-    vegetableGroup = answer.id === 'leafy' || answer.id === 'root' || answer.id === 'any' ? answer.id : 'any';
+    vegetableGroup = answer.id === 'leafy' || answer.id === 'root' ? answer.id : null;
     generalSinceLastVegetableCraving = GENERAL_QUESTIONS_BETWEEN_HOME_WET_CRAVINGS;
   } else if (question.kind === 'vegetable_craving' && question.vegetableCraving) {
     askedVegetableCravings = addUniqueVegetableCraving(askedVegetableCravings, question.vegetableCraving);

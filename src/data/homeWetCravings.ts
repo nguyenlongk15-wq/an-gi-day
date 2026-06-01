@@ -8,7 +8,7 @@ type FoodTypeConfig = {
 
 type VegetableConfig = {
   type: VegetableCraving;
-  group: Exclude<VegetableGroup, 'any'>;
+  group: VegetableGroup;
   icon: string;
   question: string;
 };
@@ -116,7 +116,6 @@ export function createHomeWetVegetableGroupQuestion(): Question {
     options: [
       { id: 'leafy', label: 'Rau lá', icon: '🥬', tags: ['leafy'] },
       { id: 'root', label: 'Rau củ', icon: '🥕', tags: ['root'] },
-      { id: 'any', label: 'Không quan trọng', icon: '😌', tags: ['any'] },
     ],
   };
 }

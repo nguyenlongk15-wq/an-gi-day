@@ -10,7 +10,7 @@ export type FoodTypeCraving = 'soup_like' | 'porridge_like' | 'noodle_like';
 
 export type PreferredFoodType = FoodTypeCraving | null;
 
-export type VegetableGroup = 'leafy' | 'root' | 'any';
+export type VegetableGroup = 'leafy' | 'root';
 
 export type VegetableCraving =
   | 'malabar_spinach'

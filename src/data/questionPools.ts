@@ -245,15 +245,6 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: 'home_wet_ingredient_count',
-      icon: '🥕',
-      text: 'Muốn ít nguyên liệu hay đầy đủ hơn?',
-      options: [
-        { id: 'simple', label: 'Ít nguyên liệu', icon: '👌', tags: ['quick', 'budget'] },
-        { id: 'fuller', label: 'Đầy đủ hơn', icon: '🥕', tags: ['vegetable', 'rich'] },
-      ],
-    },
-    {
       id: 'home_wet_budget',
       icon: '💰',
       text: 'Muốn tiết kiệm hay ăn thoải mái?',
@@ -272,30 +263,12 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: 'home_wet_leftover',
-      icon: '🧊',
-      text: 'Có muốn tận dụng đồ đang có sẵn không?',
-      options: [
-        { id: 'leftover_yes', label: 'Có', icon: '♻️', tags: ['quick', 'budget'] },
-        { id: 'leftover_no', label: 'Không', icon: '🛒', tags: ['premium', 'rich'] },
-      ],
-    },
-    {
       id: 'home_wet_fatigue',
       icon: '😮‍💨',
       text: 'Hôm nay muốn nấu nhẹ tay hay chịu khó hơn?',
       options: [
         { id: 'easy_mode', label: 'Nhẹ tay', icon: '😌', tags: ['quick', 'simple'] },
         { id: 'can_cook', label: 'Chịu khó hơn', icon: '🍳', tags: ['slow', 'rich'] },
-      ],
-    },
-    {
-      id: 'home_wet_kid_friendly',
-      icon: '🙂',
-      text: 'Muốn dễ ăn cho mọi người không?',
-      options: [
-        { id: 'easy_family', label: 'Dễ ăn', icon: '🙂', tags: ['mild', 'shared'] },
-        { id: 'personal_taste', label: 'Theo ý mình', icon: '😋', tags: ['spicy', 'rich'] },
       ],
     },
     {
