@@ -254,15 +254,6 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: 'home_wet_rice_pairing',
-      icon: '🍚',
-      text: 'Có muốn ăn kèm cơm không?',
-      options: [
-        { id: 'with_rice', label: 'Có', icon: '🍚', tags: ['rice_pairing', 'soup_like', 'filling'] },
-        { id: 'no_rice', label: 'Không', icon: '🥣', tags: ['porridge_like', 'noodle_like', 'light_bite'] },
-      ],
-    },
-    {
       id: 'home_wet_fatigue',
       icon: '😮‍💨',
       text: 'Hôm nay muốn nấu nhẹ tay hay chịu khó hơn?',
