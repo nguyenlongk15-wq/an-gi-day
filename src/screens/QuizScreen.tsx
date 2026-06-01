@@ -53,7 +53,10 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
     }
 
     const recentIds = await getLastShownResultIds();
-    const bestResult = getBestResults(nextState.answers, nextState.branch, recentIds, nextState.preferredCraving);
+    const bestResult = getBestResults(nextState.answers, nextState.branch, recentIds, nextState.preferredCraving, {
+      preferredFoodType: nextState.preferredFoodType,
+      preferredVegetableCraving: nextState.preferredVegetableCraving,
+    });
     await rememberResult(bestResult.selected.id);
 
     onComplete({
@@ -62,6 +65,8 @@ export default function QuizScreen({ onComplete, onExit }: QuizScreenProps) {
       branch: nextState.branch,
       answers: nextState.answers,
       preferredCraving: nextState.preferredCraving,
+      preferredFoodType: nextState.preferredFoodType,
+      preferredVegetableCraving: nextState.preferredVegetableCraving,
       reason: bestResult.reason,
       topResults: bestResult.topResults,
     });

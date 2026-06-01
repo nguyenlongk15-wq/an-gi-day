@@ -28,6 +28,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "npx expo export -p web",
+    "build": "npm run build:web",
     "dev": "expo start --web",
     "typecheck": "node --stack_size=8192 ./node_modules/typescript/bin/tsc --noEmit"
   },

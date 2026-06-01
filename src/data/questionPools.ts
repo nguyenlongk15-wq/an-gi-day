@@ -173,30 +173,12 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
   ],
   home_wet: [
     {
-      id: 'home_wet_style',
-      icon: '🍜',
-      text: 'Muốn canh/cháo hay mì/bún?',
-      options: [
-        { id: 'soup_porridge', label: 'Canh/Cháo', icon: '🍲', tags: ['soup', 'porridge', 'light'] },
-        { id: 'noodle', label: 'Mì/Bún', icon: '🍜', tags: ['noodle', 'filling'] },
-      ],
-    },
-    {
-      id: 'home_wet_main',
-      icon: '🥩',
-      text: 'Muốn thịt/gà hay hải sản?',
-      options: [
-        { id: 'meat_chicken', label: 'Thịt/Gà', icon: '🍗', tags: ['meat', 'chicken'] },
-        { id: 'seafood', label: 'Hải sản', icon: '🦐', tags: ['seafood'] },
-      ],
-    },
-    {
       id: 'home_wet_cook_time',
       icon: '⏱️',
-      text: 'Muốn nấu nhanh hay nấu hơi lâu?',
+      text: 'Muốn làm nhanh hay nấu kỹ hơn?',
       options: [
-        { id: 'quick', label: 'Nhanh', icon: '⚡', tags: ['quick'] },
-        { id: 'slow', label: 'Hơi lâu', icon: '🍲', tags: ['slow', 'rich'] },
+        { id: 'quick', label: 'Làm nhanh', icon: '⚡', tags: ['quick', 'budget'] },
+        { id: 'slow', label: 'Nấu kỹ hơn', icon: '🍲', tags: ['slow', 'rich'] },
       ],
     },
     {
@@ -211,28 +193,28 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
     {
       id: 'home_wet_taste',
       icon: '🍋',
-      text: 'Thích vị thanh hay chua cay?',
+      text: 'Muốn vị thanh nhẹ hay đậm đà?',
       options: [
-        { id: 'clear', label: 'Thanh', icon: '🌿', tags: ['clear_broth', 'light', 'mild'] },
-        { id: 'sour_spicy', label: 'Chua cay', icon: '🍋', tags: ['sour', 'spicy', 'rich'] },
+        { id: 'light', label: 'Thanh nhẹ', icon: '🌿', tags: ['clear_broth', 'light', 'mild'] },
+        { id: 'bold', label: 'Đậm đà', icon: '🧂', tags: ['rich', 'filling'] },
       ],
     },
     {
-      id: 'home_wet_temperature',
-      icon: '🔥',
-      text: 'Muốn nóng bụng hay mát dễ ăn?',
+      id: 'home_wet_sour',
+      icon: '🍋',
+      text: 'Có muốn vị chua nhẹ không?',
       options: [
-        { id: 'hot', label: 'Nóng bụng', icon: '🔥', tags: ['hot', 'filling'] },
-        { id: 'cool', label: 'Mát dễ ăn', icon: '🧊', tags: ['light', 'clear_broth'] },
+        { id: 'sour_yes', label: 'Có', icon: '🍋', tags: ['sour'] },
+        { id: 'sour_no', label: 'Không', icon: '🙂', tags: ['mild', 'clear_broth'] },
       ],
     },
     {
       id: 'home_wet_fullness',
       icon: '🍚',
-      text: 'Muốn ăn nhẹ hay no lâu?',
+      text: 'Muốn nhẹ bụng hay no hơn?',
       options: [
-        { id: 'light', label: 'Ăn nhẹ', icon: '🌿', tags: ['light', 'clear_broth'] },
-        { id: 'filling', label: 'No lâu', icon: '🍚', tags: ['filling', 'noodle'] },
+        { id: 'light', label: 'Nhẹ bụng', icon: '🌿', tags: ['light', 'clear_broth'] },
+        { id: 'filling', label: 'No hơn', icon: '🍚', tags: ['filling', 'porridge_like', 'noodle_like'] },
       ],
     },
     {
@@ -241,34 +223,34 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       text: 'Nấu cho mình hay cho cả nhà?',
       options: [
         { id: 'solo', label: 'Một mình', icon: '🧍', tags: ['solo', 'quick'] },
-        { id: 'family', label: 'Cả nhà', icon: '👨‍👩‍👧‍👦', tags: ['shared', 'hotpot', 'slow'] },
+        { id: 'family', label: 'Cả nhà', icon: '👨‍👩‍👧‍👦', tags: ['shared', 'slow'] },
       ],
     },
     {
       id: 'home_wet_veg_meat',
       icon: '🥬',
-      text: 'Thích nhiều rau hay nhiều thịt?',
+      text: 'Muốn thiên rau hay thiên đạm?',
       options: [
         { id: 'more_veg', label: 'Nhiều rau', icon: '🥬', tags: ['vegetable', 'light'] },
-        { id: 'more_meat', label: 'Nhiều thịt', icon: '🥩', tags: ['meat', 'filling'] },
+        { id: 'more_protein', label: 'Nhiều đạm', icon: '🥩', tags: ['meat', 'seafood', 'filling'] },
       ],
     },
     {
-      id: 'home_wet_has_noodle',
-      icon: '🍜',
-      text: 'Thích có sợi hay không có sợi?',
+      id: 'home_wet_broth_mood',
+      icon: '💧',
+      text: 'Muốn nước trong hay vị dày hơn?',
       options: [
-        { id: 'with_noodle', label: 'Có sợi', icon: '🍜', tags: ['noodle', 'filling'] },
-        { id: 'no_noodle', label: 'Không có sợi', icon: '🍲', tags: ['soup', 'light'] },
+        { id: 'clear_broth', label: 'Nước trong', icon: '💧', tags: ['clear_broth', 'light'] },
+        { id: 'thicker', label: 'Vị dày hơn', icon: '🥣', tags: ['rich', 'porridge_like'] },
       ],
     },
     {
-      id: 'home_wet_egg',
-      icon: '🥚',
-      text: 'Có muốn ăn trứng không?',
+      id: 'home_wet_ingredient_count',
+      icon: '🥕',
+      text: 'Muốn ít nguyên liệu hay đầy đủ hơn?',
       options: [
-        { id: 'egg_yes', label: 'Có', icon: '🍳', tags: ['egg_tofu', 'quick'] },
-        { id: 'egg_no', label: 'Không', icon: '❌', tags: ['meat', 'seafood', 'vegetable'] },
+        { id: 'simple', label: 'Ít nguyên liệu', icon: '👌', tags: ['quick', 'budget'] },
+        { id: 'fuller', label: 'Đầy đủ hơn', icon: '🥕', tags: ['vegetable', 'rich'] },
       ],
     },
     {
@@ -281,30 +263,48 @@ export const branchQuestionPools: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: 'home_wet_broth_mood',
-      icon: '🍲',
-      text: 'Muốn món nước thanh nhẹ hay đậm đà?',
+      id: 'home_wet_rice_pairing',
+      icon: '🍚',
+      text: 'Có muốn ăn kèm cơm không?',
       options: [
-        { id: 'gentle_broth', label: 'Thanh nhẹ', icon: '🌿', tags: ['clear_broth', 'light', 'mild'] },
-        { id: 'bold_broth', label: 'Đậm đà', icon: '🧂', tags: ['rich', 'saucy', 'filling'] },
+        { id: 'with_rice', label: 'Có', icon: '🍚', tags: ['rice_pairing', 'soup_like', 'filling'] },
+        { id: 'no_rice', label: 'Không', icon: '🥣', tags: ['porridge_like', 'noodle_like', 'light_bite'] },
       ],
     },
     {
-      id: 'home_wet_broth_strength',
-      icon: '🍲',
-      text: 'Muốn món nước trong hay nước đậm?',
+      id: 'home_wet_leftover',
+      icon: '🧊',
+      text: 'Có muốn tận dụng đồ đang có sẵn không?',
       options: [
-        { id: 'clear_broth', label: 'Nước trong', icon: '💧', tags: ['clear_broth', 'light'] },
-        { id: 'bold_broth', label: 'Nước đậm', icon: '🧂', tags: ['rich', 'saucy'] },
+        { id: 'leftover_yes', label: 'Có', icon: '♻️', tags: ['quick', 'budget'] },
+        { id: 'leftover_no', label: 'Không', icon: '🛒', tags: ['premium', 'rich'] },
       ],
     },
     {
-      id: 'home_wet_belly',
-      icon: '🍖',
-      text: 'Muốn ăn chắc bụng hay nhẹ bụng?',
+      id: 'home_wet_fatigue',
+      icon: '😮‍💨',
+      text: 'Hôm nay muốn nấu nhẹ tay hay chịu khó hơn?',
       options: [
-        { id: 'solid', label: 'Chắc bụng', icon: '🍚', tags: ['filling', 'noodle'] },
-        { id: 'gentle', label: 'Nhẹ bụng', icon: '🌿', tags: ['light', 'soup'] },
+        { id: 'easy_mode', label: 'Nhẹ tay', icon: '😌', tags: ['quick', 'simple'] },
+        { id: 'can_cook', label: 'Chịu khó hơn', icon: '🍳', tags: ['slow', 'rich'] },
+      ],
+    },
+    {
+      id: 'home_wet_kid_friendly',
+      icon: '🙂',
+      text: 'Muốn dễ ăn cho mọi người không?',
+      options: [
+        { id: 'easy_family', label: 'Dễ ăn', icon: '🙂', tags: ['mild', 'shared'] },
+        { id: 'personal_taste', label: 'Theo ý mình', icon: '😋', tags: ['spicy', 'rich'] },
+      ],
+    },
+    {
+      id: 'home_wet_comfort',
+      icon: '🥣',
+      text: 'Muốn kiểu dễ chịu hay chắc vị hơn?',
+      options: [
+        { id: 'gentle', label: 'Dễ chịu', icon: '🌿', tags: ['light', 'mild', 'clear_broth'] },
+        { id: 'comforting', label: 'Chắc vị', icon: '🧂', tags: ['rich', 'filling'] },
       ],
     },
   ],

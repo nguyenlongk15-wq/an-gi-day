@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Heart, RotateCcw, Shuffle, Sparkles, Trash2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import type { Food } from '../types';
 import { colors, primaryShadow, radius, shadow, spacing, typography } from '../theme';
+
+const useHeartNativeDriver = Platform.OS !== 'web';
 
 type FoodResultCardProps = {
   food: Food;
@@ -87,11 +89,11 @@ export default function FoodResultCard({
       Animated.timing(heartScale, {
         toValue: 1.14,
         duration: 120,
-        useNativeDriver: true,
+        useNativeDriver: useHeartNativeDriver,
       }),
       Animated.spring(heartScale, {
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: useHeartNativeDriver,
         friction: 4,
       }),
     ]).start();

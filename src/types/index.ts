@@ -6,6 +6,36 @@ export type CravingType = 'chicken' | 'beef' | 'pork' | 'fish' | 'egg' | 'tofu' 
 
 export type PreferredCraving = Exclude<CravingType, 'seafood'>;
 
+export type FoodTypeCraving = 'soup_like' | 'porridge_like' | 'noodle_like';
+
+export type PreferredFoodType = FoodTypeCraving | null;
+
+export type VegetableGroup = 'leafy' | 'root' | 'any';
+
+export type VegetableCraving =
+  | 'malabar_spinach'
+  | 'amaranth'
+  | 'mustard_greens'
+  | 'water_spinach'
+  | 'moringa'
+  | 'watercress'
+  | 'spinach'
+  | 'seaweed'
+  | 'garlic_chives'
+  | 'napa_cabbage'
+  | 'pumpkin'
+  | 'winter_melon'
+  | 'gourd'
+  | 'bitter_melon'
+  | 'carrot_potato'
+  | 'taro'
+  | 'chayote'
+  | 'tomato'
+  | 'mushroom'
+  | 'okra';
+
+export type PreferredVegetableCraving = VegetableCraving | null;
+
 export type QuizPhase = 'fixed' | 'finding_craving' | 'profiling' | 'complete';
 
 export type Food = {
@@ -27,7 +57,7 @@ export type AnswerOption = {
   icon: string;
 };
 
-export type QuestionKind = 'fixed' | 'general' | 'craving';
+export type QuestionKind = 'fixed' | 'general' | 'craving' | 'food_type_craving' | 'vegetable_group' | 'vegetable_craving';
 
 export type Question = {
   id: string;
@@ -36,6 +66,9 @@ export type Question = {
   options: AnswerOption[];
   kind?: QuestionKind;
   cravingType?: CravingType;
+  foodType?: FoodTypeCraving;
+  vegetableCraving?: VegetableCraving;
+  vegetableGroup?: VegetableGroup;
 };
 
 export type QuizAnswer = {
@@ -45,6 +78,9 @@ export type QuizAnswer = {
   answerLabel: string;
   answerIcon?: string;
   cravingType?: CravingType;
+  foodType?: FoodTypeCraving;
+  vegetableCraving?: VegetableCraving;
+  vegetableGroup?: VegetableGroup;
   tags: string[];
 };
 
@@ -55,12 +91,19 @@ export type QuizState = {
   askedQuestionIds: string[];
   askedCravings: CravingType[];
   preferredCraving: PreferredCraving | null;
+  askedFoodTypes: FoodTypeCraving[];
+  preferredFoodType: PreferredFoodType;
+  vegetableGroup: VegetableGroup | null;
+  askedVegetableCravings: VegetableCraving[];
+  preferredVegetableCraving: PreferredVegetableCraving;
   seafoodFollowUpMode: boolean;
   pendingSeafoodOptions: ('squid' | 'shrimp')[];
   generalAnswerCount: number;
   usefulAnswerCount: number;
   targetUsefulAnswerCount: number;
   generalSinceLastCraving: number;
+  generalSinceLastFoodType: number;
+  generalSinceLastVegetableCraving: number;
 };
 
 export type SkipMessage = {
@@ -76,6 +119,8 @@ export type FoodResultPayload = {
   branch: Branch;
   answers: QuizAnswer[];
   preferredCraving: PreferredCraving | null;
+  preferredFoodType: PreferredFoodType;
+  preferredVegetableCraving: PreferredVegetableCraving;
   reason: string;
   topResults: Food[];
 };

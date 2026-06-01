@@ -45,7 +45,10 @@ function FoodResultContent({ result, onRestart }: { result: FoodResultPayload; o
 
   const handleAlternative = async () => {
     const recentIds = await getLastShownResultIds();
-    const nextFood = getAlternativeResult(food.id, result.topResults, result.branch, recentIds, result.preferredCraving);
+    const nextFood = getAlternativeResult(food.id, result.topResults, result.branch, recentIds, result.preferredCraving, {
+      preferredFoodType: result.preferredFoodType,
+      preferredVegetableCraving: result.preferredVegetableCraving,
+    });
     setFood(nextFood);
     setReason(`${nextFood.name} có thể là món bạn đang thèm lúc này đúng không?`);
     await rememberResult(nextFood.id);
