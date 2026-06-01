@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import type { TextStyle } from 'react-native';
 import { Heart, Play, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -9,12 +8,6 @@ import { colors, maxContentWidth, primaryShadow, radius, shadow, spacing, typogr
 import type { RouteName } from '../types';
 
 const heroImage = require('../../assets/food-hero.png');
-
-const titleGlow = {
-  eat: { textShadow: '0px 5px 14px rgba(255, 122, 79, 0.24)' } as unknown as TextStyle,
-  connector: { textShadow: '0px 2px 8px rgba(0, 0, 0, 0.38)' } as unknown as TextStyle,
-  skip: { textShadow: '0px 5px 14px rgba(75, 227, 209, 0.22)' } as unknown as TextStyle,
-};
 
 type HomeScreenProps = {
   onStart: () => void;
@@ -53,7 +46,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.86}
-                style={[styles.titleEat, titleGlow.eat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
+                style={[styles.titleEat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
               >
                 Ăn
               </Text>
@@ -61,7 +54,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.9}
-                style={[styles.titleConnector, titleGlow.connector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
+                style={[styles.titleConnector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
               >
                 hay
               </Text>
@@ -69,7 +62,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.82}
-                style={[styles.titleSkip, titleGlow.skip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
+                style={[styles.titleSkip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
               >
                 Nhịn?
               </Text>
