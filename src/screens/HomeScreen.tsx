@@ -11,9 +11,9 @@ import type { RouteName } from '../types';
 const heroImage = require('../../assets/food-hero.png');
 
 const titleGlow = {
-  eat: { textShadow: '0px 4px 10px rgba(255, 86, 43, 0.92)' } as unknown as TextStyle,
-  connector: { textShadow: '0px 3px 8px rgba(0, 0, 0, 0.85)' } as unknown as TextStyle,
-  skip: { textShadow: '0px 4px 12px rgba(14, 215, 236, 0.92)' } as unknown as TextStyle,
+  eat: { textShadow: '0px 5px 14px rgba(255, 122, 79, 0.24)' } as unknown as TextStyle,
+  connector: { textShadow: '0px 2px 8px rgba(0, 0, 0, 0.38)' } as unknown as TextStyle,
+  skip: { textShadow: '0px 5px 14px rgba(75, 227, 209, 0.22)' } as unknown as TextStyle,
 };
 
 type HomeScreenProps = {
@@ -48,30 +48,32 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
               <Text style={styles.badgeText}>Mini game chọn món</Text>
             </View>
 
-            <View style={[styles.titleLine, tight && styles.tightTitleLine]}>
+            <View style={[styles.titleBlock, tight && styles.tightTitleBlock]}>
+              <View style={styles.titleTopLine}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.86}
+                  style={[styles.titleEat, titleGlow.eat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
+                >
+                  Ăn
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.9}
+                  style={[styles.titleConnector, titleGlow.connector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
+                >
+                  hay
+                </Text>
+              </View>
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
-                minimumFontScale={0.84}
-                style={[styles.titleEat, titleGlow.eat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
-              >
-                ĂN
-              </Text>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.86}
-                style={[styles.titleConnector, titleGlow.connector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
-              >
-                hay
-              </Text>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.78}
+                minimumFontScale={0.82}
                 style={[styles.titleSkip, titleGlow.skip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
               >
-                NHỊN?
+                Nhịn?
               </Text>
             </View>
 
@@ -225,64 +227,69 @@ const styles = StyleSheet.create({
     color: colors.ink,
     ...typography.label,
   },
-  titleLine: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+  titleBlock: {
     alignSelf: 'center',
-    gap: spacing.sm,
+    alignItems: 'center',
+    gap: 0,
     minWidth: 0,
   },
-  tightTitleLine: {
+  tightTitleBlock: {
+    gap: 1,
+  },
+  titleTopLine: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
     gap: spacing.xs,
+    minWidth: 0,
   },
   titleEat: {
-    color: '#FFB12F',
+    color: '#FF7A4F',
     fontFamily: typography.hero.fontFamily,
-    fontSize: 82,
-    lineHeight: 88,
-    fontWeight: '900',
-    letterSpacing: 0,
+    fontSize: 56,
+    lineHeight: 62,
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   compactTitleEat: {
-    fontSize: 58,
-    lineHeight: 64,
+    fontSize: 48,
+    lineHeight: 53,
   },
   tightTitleEat: {
-    fontSize: 52,
-    lineHeight: 58,
+    fontSize: 42,
+    lineHeight: 47,
   },
   titleConnector: {
-    color: 'rgba(255,255,255,0.92)',
-    fontFamily: typography.hero.fontFamily,
-    fontSize: 36,
-    lineHeight: 48,
-    fontStyle: 'italic',
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: 'rgba(255,255,255,0.74)',
+    fontFamily: typography.button.fontFamily,
+    fontSize: 24,
+    lineHeight: 31,
+    fontWeight: '700',
+    letterSpacing: 0.1,
   },
   compactTitleConnector: {
-    fontSize: 28,
-    lineHeight: 38,
+    fontSize: 20,
+    lineHeight: 27,
   },
   tightTitleConnector: {
-    fontSize: 25,
-    lineHeight: 34,
+    fontSize: 18,
+    lineHeight: 24,
   },
   titleSkip: {
-    color: '#55E8FF',
+    color: '#4BE3D1',
     fontFamily: typography.hero.fontFamily,
-    fontSize: 76,
-    lineHeight: 84,
-    fontWeight: '900',
-    letterSpacing: 0,
+    fontSize: 62,
+    lineHeight: 68,
+    fontWeight: '800',
+    letterSpacing: 0.15,
   },
   compactTitleSkip: {
     fontSize: 52,
-    lineHeight: 60,
+    lineHeight: 58,
   },
   tightTitleSkip: {
-    fontSize: 48,
-    lineHeight: 56,
+    fontSize: 45,
+    lineHeight: 50,
   },
   slogan: {
     color: 'rgba(255,255,255,0.82)',
