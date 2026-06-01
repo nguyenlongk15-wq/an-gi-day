@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Heart, Play, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -8,6 +8,7 @@ import { colors, maxContentWidth, primaryShadow, radius, shadow, spacing, typogr
 import type { RouteName } from '../types';
 
 const heroImage = require('../../assets/food-hero.png');
+const useTitleNativeDriver = Platform.OS !== 'web';
 
 type HomeScreenProps = {
   onStart: () => void;
@@ -19,6 +20,84 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const compact = width < 520;
   const tight = width < 380;
   const [startHovered, setStartHovered] = useState(false);
+  const eatScale = useRef(new Animated.Value(0.92)).current;
+  const eatTranslateY = useRef(new Animated.Value(12)).current;
+  const eatOpacity = useRef(new Animated.Value(0)).current;
+  const fastScale = useRef(new Animated.Value(0.92)).current;
+  const fastTranslateY = useRef(new Animated.Value(12)).current;
+  const fastOpacity = useRef(new Animated.Value(0)).current;
+  const connectorOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const resetTitleMotion = (scale: Animated.Value, translateY: Animated.Value, opacity: Animated.Value) => {
+      scale.setValue(0.92);
+      translateY.setValue(12);
+      opacity.setValue(0);
+    };
+
+    const createTitleMotion = (scale: Animated.Value, translateY: Animated.Value, opacity: Animated.Value, delay: number) =>
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 180,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.sequence([
+            Animated.timing(scale, {
+              toValue: 1.08,
+              duration: 260,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: useTitleNativeDriver,
+            }),
+            Animated.spring(scale, {
+              toValue: 1,
+              tension: 92,
+              friction: 9,
+              useNativeDriver: useTitleNativeDriver,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(translateY, {
+              toValue: -4,
+              duration: 260,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: useTitleNativeDriver,
+            }),
+            Animated.spring(translateY, {
+              toValue: 0,
+              tension: 92,
+              friction: 9,
+              useNativeDriver: useTitleNativeDriver,
+            }),
+          ]),
+        ]),
+      ]);
+
+    resetTitleMotion(eatScale, eatTranslateY, eatOpacity);
+    resetTitleMotion(fastScale, fastTranslateY, fastOpacity);
+    connectorOpacity.setValue(0);
+
+    const titleMotion = Animated.parallel([
+      createTitleMotion(eatScale, eatTranslateY, eatOpacity, 0),
+      Animated.sequence([
+        Animated.delay(70),
+        Animated.timing(connectorOpacity, {
+          toValue: 1,
+          duration: 300,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+      ]),
+      createTitleMotion(fastScale, fastTranslateY, fastOpacity, 120),
+    ]);
+
+    titleMotion.start();
+
+    return () => titleMotion.stop();
+  }, [connectorOpacity, eatOpacity, eatScale, eatTranslateY, fastOpacity, fastScale, fastTranslateY]);
 
   return (
     <ScrollView contentContainerStyle={[styles.scroll, compact && styles.compactScroll]}>
@@ -42,30 +121,55 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
             </View>
 
             <View style={[styles.titleBlock, tight && styles.tightTitleBlock]}>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.86}
-                style={[styles.titleEat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
+              <Animated.View
+                style={[
+                  styles.titleAnimatedWord,
+                  {
+                    opacity: eatOpacity,
+                    transform: [{ translateY: eatTranslateY }, { scale: eatScale }],
+                  },
+                ]}
               >
-                Ăn
-              </Text>
-              <Text
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.86}
+                  style={[styles.titleEat, compact && styles.compactTitleEat, tight && styles.tightTitleEat]}
+                >
+                  Ăn
+                </Text>
+              </Animated.View>
+              <Animated.Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.9}
-                style={[styles.titleConnector, compact && styles.compactTitleConnector, tight && styles.tightTitleConnector]}
+                style={[
+                  styles.titleConnector,
+                  compact && styles.compactTitleConnector,
+                  tight && styles.tightTitleConnector,
+                  { opacity: connectorOpacity },
+                ]}
               >
                 hay
-              </Text>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.82}
-                style={[styles.titleSkip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
+              </Animated.Text>
+              <Animated.View
+                style={[
+                  styles.titleAnimatedWord,
+                  {
+                    opacity: fastOpacity,
+                    transform: [{ translateY: fastTranslateY }, { scale: fastScale }],
+                  },
+                ]}
               >
-                Nhịn?
-              </Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.82}
+                  style={[styles.titleSkip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
+                >
+                  Nhịn?
+                </Text>
+              </Animated.View>
             </View>
 
             <Text style={[styles.slogan, compact && styles.compactSlogan]}>
@@ -223,10 +327,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 2,
     minWidth: 0,
-    paddingTop: 4,
+    paddingTop: 8,
+    paddingHorizontal: spacing.xs,
+    overflow: 'visible',
   },
   tightTitleBlock: {
     gap: 0,
+  },
+  titleAnimatedWord: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
   },
   titleEat: {
     color: '#FF7A4F',
