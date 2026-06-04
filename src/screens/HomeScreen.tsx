@@ -8,6 +8,7 @@ import { colors, maxContentWidth, primaryShadow, radius, shadow, spacing, typogr
 import type { RouteName } from '../types';
 
 const heroImage = require('../../assets/food-hero.png');
+const handTapImage = require('../../assets/hand-tap.png');
 const useTitleNativeDriver = Platform.OS !== 'web';
 
 type HomeScreenProps = {
@@ -31,7 +32,14 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const startScale = useRef(new Animated.Value(0.96)).current;
   const startTranslateY = useRef(new Animated.Value(14)).current;
   const startOpacity = useRef(new Animated.Value(0)).current;
-  const startBreathScale = useRef(new Animated.Value(1)).current;
+  const startTapScale = useRef(new Animated.Value(1)).current;
+  const handTranslateX = useRef(new Animated.Value(0)).current;
+  const handTranslateY = useRef(new Animated.Value(0)).current;
+  const handRotate = useRef(new Animated.Value(0)).current;
+  const tapRippleOpacity = useRef(new Animated.Value(0)).current;
+  const tapRippleScale = useRef(new Animated.Value(0.65)).current;
+  const tapSparkOpacity = useRef(new Animated.Value(0)).current;
+  const tapSparkScale = useRef(new Animated.Value(0.7)).current;
 
   useEffect(() => {
     let mounted = true;
@@ -127,7 +135,14 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
     startScale.setValue(0.96);
     startTranslateY.setValue(14);
     startOpacity.setValue(0);
-    startBreathScale.setValue(1);
+    startTapScale.setValue(1);
+    handTranslateX.setValue(0);
+    handTranslateY.setValue(0);
+    handRotate.setValue(0);
+    tapRippleOpacity.setValue(0);
+    tapRippleScale.setValue(0.65);
+    tapSparkOpacity.setValue(0);
+    tapSparkScale.setValue(0.7);
 
     if (reduceMotion) {
       startScale.setValue(1);
@@ -135,6 +150,128 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
       startOpacity.setValue(1);
       return undefined;
     }
+
+    const createTapMotion = (targetScale: number) =>
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(handTranslateX, {
+            toValue: -8,
+            duration: 120,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.timing(handTranslateY, {
+            toValue: -9,
+            duration: 120,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.timing(handRotate, {
+            toValue: 1,
+            duration: 120,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.timing(startTapScale, {
+            toValue: targetScale,
+            duration: 120,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.sequence([
+            Animated.parallel([
+              Animated.timing(tapRippleOpacity, {
+                toValue: 0,
+                duration: 1,
+                useNativeDriver: useTitleNativeDriver,
+              }),
+              Animated.timing(tapRippleScale, {
+                toValue: 0.65,
+                duration: 1,
+                useNativeDriver: useTitleNativeDriver,
+              }),
+              Animated.timing(tapSparkOpacity, {
+                toValue: 0,
+                duration: 1,
+                useNativeDriver: useTitleNativeDriver,
+              }),
+              Animated.timing(tapSparkScale, {
+                toValue: 0.7,
+                duration: 1,
+                useNativeDriver: useTitleNativeDriver,
+              }),
+            ]),
+            Animated.parallel([
+              Animated.sequence([
+                Animated.timing(tapRippleOpacity, {
+                  toValue: 0.68,
+                  duration: 80,
+                  easing: Easing.out(Easing.quad),
+                  useNativeDriver: useTitleNativeDriver,
+                }),
+                Animated.timing(tapRippleOpacity, {
+                  toValue: 0,
+                  duration: 210,
+                  easing: Easing.out(Easing.quad),
+                  useNativeDriver: useTitleNativeDriver,
+                }),
+              ]),
+              Animated.timing(tapRippleScale, {
+                toValue: 1.24,
+                duration: 290,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: useTitleNativeDriver,
+              }),
+              Animated.sequence([
+                Animated.timing(tapSparkOpacity, {
+                  toValue: 1,
+                  duration: 70,
+                  easing: Easing.out(Easing.quad),
+                  useNativeDriver: useTitleNativeDriver,
+                }),
+                Animated.timing(tapSparkOpacity, {
+                  toValue: 0,
+                  duration: 220,
+                  easing: Easing.out(Easing.quad),
+                  useNativeDriver: useTitleNativeDriver,
+                }),
+              ]),
+              Animated.timing(tapSparkScale, {
+                toValue: 1.16,
+                duration: 290,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: useTitleNativeDriver,
+              }),
+            ]),
+          ]),
+        ]),
+        Animated.parallel([
+          Animated.spring(handTranslateX, {
+            toValue: 0,
+            tension: 130,
+            friction: 12,
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.spring(handTranslateY, {
+            toValue: 0,
+            tension: 130,
+            friction: 12,
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.spring(handRotate, {
+            toValue: 0,
+            tension: 130,
+            friction: 12,
+            useNativeDriver: useTitleNativeDriver,
+          }),
+          Animated.spring(startTapScale, {
+            toValue: 1,
+            tension: 150,
+            friction: 9,
+            useNativeDriver: useTitleNativeDriver,
+          }),
+        ]),
+      ]);
 
     const entranceMotion = Animated.sequence([
       Animated.delay(180),
@@ -160,35 +297,45 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
       ]),
     ]);
 
-    const breathMotion = Animated.loop(
+    const doubleTapMotion = Animated.loop(
       Animated.sequence([
-        Animated.delay(3200),
-        Animated.timing(startBreathScale, {
-          toValue: 1.014,
-          duration: 520,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: useTitleNativeDriver,
-        }),
-        Animated.timing(startBreathScale, {
-          toValue: 1,
-          duration: 640,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: useTitleNativeDriver,
-        }),
+        Animated.delay(760),
+        createTapMotion(0.965),
+        Animated.delay(135),
+        createTapMotion(0.94),
+        Animated.delay(2500),
       ]),
     );
 
     entranceMotion.start(({ finished }) => {
       if (finished) {
-        breathMotion.start();
+        doubleTapMotion.start();
       }
     });
 
     return () => {
       entranceMotion.stop();
-      breathMotion.stop();
+      doubleTapMotion.stop();
     };
-  }, [reduceMotion, startBreathScale, startOpacity, startScale, startTranslateY]);
+  }, [
+    handRotate,
+    handTranslateX,
+    handTranslateY,
+    reduceMotion,
+    startOpacity,
+    startScale,
+    startTapScale,
+    startTranslateY,
+    tapRippleOpacity,
+    tapRippleScale,
+    tapSparkOpacity,
+    tapSparkScale,
+  ]);
+
+  const handRotation = handRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '-6deg'],
+  });
 
   return (
     <ScrollView contentContainerStyle={[styles.scroll, compact && styles.compactScroll]}>
@@ -278,40 +425,90 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
             },
           ]}
         >
-          <Animated.View style={{ transform: [{ scale: startBreathScale }] }}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onStart}
-              onHoverIn={() => setStartHovered(true)}
-              onHoverOut={() => setStartHovered(false)}
-              style={({ pressed }) => [
-                styles.startButton,
-                compact && styles.compactStartButton,
-                startHovered && styles.startHovered,
-                pressed && styles.startPressed,
+          <View style={[styles.startTapStage, compact && styles.compactStartTapStage]}>
+            <Animated.View
+              style={[
+                styles.startTapTarget,
+                compact && styles.compactStartTapTarget,
+                {
+                  transform: [{ scale: startTapScale }],
+                },
               ]}
             >
-              <LinearGradient
-                colors={startHovered ? ['#FF4F3C', '#FF7950', '#FFB14D'] : ['#FF533E', '#FF724F', '#FFA64B']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.startGradient, compact && styles.compactStartGradient]}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Bắt đầu"
+                onPress={onStart}
+                onHoverIn={() => setStartHovered(true)}
+                onHoverOut={() => setStartHovered(false)}
+                style={({ pressed }) => [
+                  styles.startButton,
+                  compact && styles.compactStartButton,
+                  startHovered && styles.startHovered,
+                  pressed && styles.startPressed,
+                ]}
               >
                 <LinearGradient
-                  colors={['rgba(255,255,255,0.34)', 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0)']}
+                  colors={startHovered ? ['#FFAA4B', '#FF764A', '#FF4F55'] : ['#FFA64B', '#FF7450', '#FF514F']}
                   start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={[styles.startGloss, styles.noPointerEvents]}
-                />
-                <View style={[styles.startPlayBadge, compact && styles.compactStartPlayBadge, startHovered && styles.startPlayBadgeHovered]}>
-                  <View style={startHovered && styles.startPlayNudge}>
-                    <Play color="#FF6748" size={compact ? 19 : 21} fill="#FF6748" />
+                  end={{ x: 1, y: 1 }}
+                  style={[styles.startGradient, compact && styles.compactStartGradient]}
+                >
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.38)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={[styles.startGloss, styles.noPointerEvents]}
+                  />
+                  <View style={[styles.startPlayBadge, compact && styles.compactStartPlayBadge]}>
+                    <Play color={colors.ink} size={compact ? 34 : 38} fill={colors.ink} />
                   </View>
-                </View>
-                <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
-              </LinearGradient>
-            </Pressable>
-          </Animated.View>
+                  <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
+                </LinearGradient>
+              </Pressable>
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                styles.tapRipple,
+                compact && styles.compactTapRipple,
+                styles.noPointerEvents,
+                {
+                  opacity: tapRippleOpacity,
+                  transform: [{ scale: tapRippleScale }],
+                },
+              ]}
+            />
+
+            <Animated.View
+              style={[
+                styles.tapSparkles,
+                compact && styles.compactTapSparkles,
+                styles.noPointerEvents,
+                {
+                  opacity: tapSparkOpacity,
+                  transform: [{ scale: tapSparkScale }],
+                },
+              ]}
+            >
+              <Text style={[styles.tapSpark, styles.tapSparkOne]}>✦</Text>
+              <Text style={[styles.tapSpark, styles.tapSparkTwo]}>✧</Text>
+              <Text style={[styles.tapSpark, styles.tapSparkThree]}>✦</Text>
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                styles.handTap,
+                compact && styles.compactHandTap,
+                styles.noPointerEvents,
+                {
+                  transform: [{ translateX: handTranslateX }, { translateY: handTranslateY }, { rotate: handRotation }],
+                },
+              ]}
+            >
+              <Image source={handTapImage} style={styles.handTapImage} resizeMode="contain" />
+            </Animated.View>
+          </View>
         </Animated.View>
       </View>
     </ScrollView>
@@ -529,78 +726,162 @@ const styles = StyleSheet.create({
   },
   startMotionWrap: {
     width: '100%',
+    alignItems: 'center',
+    marginTop: -2,
+  },
+  startTapStage: {
+    width: 288,
+    height: 224,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  compactStartTapStage: {
+    width: 244,
+    height: 202,
+  },
+  startTapTarget: {
+    width: 164,
+    height: 164,
+    borderRadius: 82,
+    boxShadow: '0px 18px 26px rgba(255, 86, 63, 0.32), 0px 6px 12px rgba(255, 184, 77, 0.18)',
+    elevation: 9,
+  },
+  compactStartTapTarget: {
+    width: 144,
+    height: 144,
+    borderRadius: 72,
   },
   startButton: {
-    minHeight: 72,
+    width: 164,
+    height: 164,
     borderRadius: radius.pill,
     overflow: 'hidden',
     backgroundColor: colors.primary,
     ...primaryShadow,
-    boxShadow: '0px 16px 26px rgba(255, 86, 63, 0.34), 0px 6px 12px rgba(255, 184, 77, 0.20)',
   },
   compactStartButton: {
-    minHeight: 66,
-    borderRadius: radius.pill,
+    width: 144,
+    height: 144,
   },
   startHovered: {
-    boxShadow: '0px 18px 30px rgba(255, 99, 66, 0.42), 0px 7px 14px rgba(255, 184, 77, 0.24)',
+    opacity: 0.98,
   },
   startGradient: {
-    minHeight: 72,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.xl,
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
     position: 'relative',
   },
   compactStartGradient: {
-    minHeight: 66,
+    gap: 6,
   },
   startGloss: {
     position: 'absolute',
-    top: 0,
-    left: spacing.lg,
-    right: spacing.lg,
-    height: 22,
-    borderRadius: radius.pill,
+    top: 10,
+    left: 24,
+    right: 24,
+    height: 46,
+    borderRadius: 999,
   },
   startPlayBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    boxShadow: '0px 5px 10px rgba(112, 28, 14, 0.18)',
+    marginBottom: 2,
   },
   compactStartPlayBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-  },
-  startPlayBadgeHovered: {
-    backgroundColor: 'rgba(255,255,255,0.96)',
-  },
-  startPlayNudge: {
-    transform: [{ translateX: 2 }],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   startText: {
     color: colors.ink,
     ...typography.button,
-    fontSize: 23,
-    lineHeight: 29,
-    textShadowColor: 'rgba(96, 20, 10, 0.26)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 28,
+    lineHeight: 34,
   },
   compactStartText: {
-    fontSize: 21,
-    lineHeight: 27,
+    fontSize: 24,
+    lineHeight: 30,
   },
   startPressed: {
     opacity: 0.96,
-    transform: [{ scale: 0.975 }],
+    transform: [{ scale: 0.94 }],
+  },
+  tapRipple: {
+    position: 'absolute',
+    width: 54,
+    height: 54,
+    right: 74,
+    bottom: 72,
+    borderRadius: 27,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.72)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  compactTapRipple: {
+    width: 46,
+    height: 46,
+    right: 58,
+    bottom: 66,
+    borderRadius: 23,
+  },
+  tapSparkles: {
+    position: 'absolute',
+    width: 86,
+    height: 74,
+    right: 45,
+    bottom: 96,
+  },
+  compactTapSparkles: {
+    right: 34,
+    bottom: 86,
+    transform: [{ scale: 0.9 }],
+  },
+  tapSpark: {
+    position: 'absolute',
+    color: colors.yellow,
+    fontFamily: typography.button.fontFamily,
+    fontWeight: '800',
+  },
+  tapSparkOne: {
+    top: 4,
+    left: 4,
+    fontSize: 18,
+  },
+  tapSparkTwo: {
+    top: 0,
+    right: 16,
+    fontSize: 24,
+    color: 'rgba(255,255,255,0.92)',
+  },
+  tapSparkThree: {
+    bottom: 10,
+    right: 2,
+    fontSize: 16,
+  },
+  handTap: {
+    position: 'absolute',
+    width: 118,
+    height: 118,
+    right: 4,
+    bottom: -4,
+  },
+  compactHandTap: {
+    width: 98,
+    height: 98,
+    right: 0,
+    bottom: 2,
+  },
+  handTapImage: {
+    width: '100%',
+    height: '100%',
   },
   pressed: {
     opacity: 0.9,
