@@ -8,7 +8,7 @@ import FavoritesScreen from '../screens/FavoritesScreen';
 import HomeScreen from '../screens/HomeScreen';
 import QuizScreen from '../screens/QuizScreen';
 import ResultScreen from '../screens/ResultScreen';
-import { colors, radius, spacing, typography } from '../theme';
+import { colors, maxContentWidth, radius, spacing, typography } from '../theme';
 import type { ResultPayload, RouteName } from '../types';
 import { clearLegacyHistoryStorage } from '../utils/storage';
 
@@ -64,13 +64,13 @@ function TabBar({ route, onNavigate }: { route: RouteName; onNavigate: (route: R
       <TabButton
         active={route === 'home'}
         label="Trang chủ"
-        icon={<Home color={route === 'home' ? colors.ink : colors.muted} size={20} />}
+        icon={<Home color={route === 'home' ? colors.ink : colors.muted} size={18} />}
         onPress={() => onNavigate('home')}
       />
       <TabButton
         active={route === 'favorites'}
         label="Yêu thích"
-        icon={<Heart color={route === 'favorites' ? colors.ink : colors.muted} size={20} />}
+        icon={<Heart color={route === 'favorites' ? colors.ink : colors.muted} size={18} />}
         onPress={() => onNavigate('favorites')}
       />
     </View>
@@ -94,43 +94,48 @@ const styles = StyleSheet.create({
   },
   screen: {
     flex: 1,
+    minHeight: 0,
   },
   tabBar: {
-    minHeight: 62,
-    borderRadius: radius.lg,
-    padding: spacing.xs,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    backgroundColor: colors.panelStrong,
+    width: '90%',
+    maxWidth: maxContentWidth,
+    alignSelf: 'center',
+    minHeight: 52,
+    borderRadius: 20,
+    padding: 5,
+    marginBottom: spacing.xs,
+    backgroundColor: 'rgba(5, 18, 24, 0.9)',
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: 'rgba(255,255,255,0.12)',
     flexDirection: 'row',
-    gap: spacing.xs,
+    gap: 6,
+    boxShadow: '0px 8px 14px rgba(0, 0, 0, 0.22)',
   },
   tabButton: {
     flex: 1,
     minWidth: 0,
-    borderRadius: radius.md,
+    minHeight: 42,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xxs,
+    gap: 2,
     paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xs,
+    paddingVertical: 4,
   },
   tabButtonActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: 'rgba(255, 107, 74, 0.94)',
   },
   tabText: {
     color: colors.muted,
     ...typography.label,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
   },
   tabTextActive: {
     color: colors.ink,
   },
   pressed: {
     opacity: 0.82,
-    transform: [{ scale: 0.98 }],
+    transform: [{ scale: 0.985 }],
   },
 });

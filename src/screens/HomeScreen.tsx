@@ -155,27 +155,27 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
       Animated.sequence([
         Animated.parallel([
           Animated.timing(handTranslateX, {
-            toValue: -8,
-            duration: 120,
+            toValue: -6,
+            duration: 145,
             easing: Easing.out(Easing.quad),
             useNativeDriver: useTitleNativeDriver,
           }),
           Animated.timing(handTranslateY, {
-            toValue: -9,
-            duration: 120,
+            toValue: -7,
+            duration: 145,
             easing: Easing.out(Easing.quad),
             useNativeDriver: useTitleNativeDriver,
           }),
           Animated.timing(handRotate, {
             toValue: 1,
-            duration: 120,
+            duration: 145,
             easing: Easing.out(Easing.quad),
             useNativeDriver: useTitleNativeDriver,
           }),
           Animated.timing(startTapScale, {
             toValue: targetScale,
-            duration: 120,
-            easing: Easing.out(Easing.quad),
+            duration: 145,
+            easing: Easing.out(Easing.cubic),
             useNativeDriver: useTitleNativeDriver,
           }),
           Animated.sequence([
@@ -204,7 +204,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
             Animated.parallel([
               Animated.sequence([
                 Animated.timing(tapRippleOpacity, {
-                  toValue: 0.68,
+                  toValue: 0.48,
                   duration: 80,
                   easing: Easing.out(Easing.quad),
                   useNativeDriver: useTitleNativeDriver,
@@ -217,7 +217,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 }),
               ]),
               Animated.timing(tapRippleScale, {
-                toValue: 1.24,
+                toValue: 1.14,
                 duration: 290,
                 easing: Easing.out(Easing.cubic),
                 useNativeDriver: useTitleNativeDriver,
@@ -266,8 +266,8 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
           }),
           Animated.spring(startTapScale, {
             toValue: 1,
-            tension: 150,
-            friction: 9,
+            tension: 120,
+            friction: 12,
             useNativeDriver: useTitleNativeDriver,
           }),
         ]),
@@ -299,11 +299,11 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
 
     const doubleTapMotion = Animated.loop(
       Animated.sequence([
-        Animated.delay(760),
-        createTapMotion(0.965),
-        Animated.delay(135),
-        createTapMotion(0.94),
-        Animated.delay(2500),
+        Animated.delay(900),
+        createTapMotion(0.972),
+        Animated.delay(160),
+        createTapMotion(0.955),
+        Animated.delay(2800),
       ]),
     );
 
@@ -449,19 +449,19 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 ]}
               >
                 <LinearGradient
-                  colors={startHovered ? ['#FFAA4B', '#FF764A', '#FF4F55'] : ['#FFA64B', '#FF7450', '#FF514F']}
+                  colors={startHovered ? ['#FFC66B', '#FF8A63', '#F35A68'] : ['#FFBA61', '#FF7F5F', '#F45A67']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={[styles.startGradient, compact && styles.compactStartGradient]}
                 >
                   <LinearGradient
-                    colors={['rgba(255,255,255,0.38)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
+                    colors={['rgba(255,255,255,0.34)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={[styles.startGloss, styles.noPointerEvents]}
                   />
                   <View style={[styles.startPlayBadge, compact && styles.compactStartPlayBadge]}>
-                    <Play color={colors.ink} size={compact ? 34 : 38} fill={colors.ink} />
+                    <Play color={colors.ink} size={compact ? 30 : 34} fill={colors.ink} />
                   </View>
                   <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
                 </LinearGradient>
@@ -542,7 +542,8 @@ const styles = StyleSheet.create({
   },
   compactScroll: {
     padding: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingBottom: 88,
+    justifyContent: 'flex-start',
   },
   content: {
     width: '100%',
@@ -730,39 +731,39 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   startTapStage: {
-    width: 288,
-    height: 224,
+    width: 256,
+    height: 190,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'visible',
   },
   compactStartTapStage: {
-    width: 244,
-    height: 202,
+    width: 218,
+    height: 172,
   },
   startTapTarget: {
-    width: 164,
-    height: 164,
-    borderRadius: 82,
-    boxShadow: '0px 18px 26px rgba(255, 86, 63, 0.32), 0px 6px 12px rgba(255, 184, 77, 0.18)',
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    boxShadow: '0px 14px 20px rgba(244, 90, 103, 0.28), 0px 5px 10px rgba(255, 186, 97, 0.18)',
     elevation: 9,
   },
   compactStartTapTarget: {
-    width: 144,
-    height: 144,
-    borderRadius: 72,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
   },
   startButton: {
-    width: 164,
-    height: 164,
+    width: 148,
+    height: 148,
     borderRadius: radius.pill,
     overflow: 'hidden',
     backgroundColor: colors.primary,
     ...primaryShadow,
   },
   compactStartButton: {
-    width: 144,
-    height: 144,
+    width: 130,
+    height: 130,
   },
   startHovered: {
     opacity: 0.98,
@@ -781,34 +782,34 @@ const styles = StyleSheet.create({
   },
   startGloss: {
     position: 'absolute',
-    top: 10,
-    left: 24,
-    right: 24,
-    height: 46,
+    top: 9,
+    left: 22,
+    right: 22,
+    height: 42,
     borderRadius: 999,
   },
   startPlayBadge: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
   },
   compactStartPlayBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   startText: {
     color: colors.ink,
     ...typography.button,
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 25,
+    lineHeight: 31,
   },
   compactStartText: {
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 22,
+    lineHeight: 28,
   },
   startPressed: {
     opacity: 0.96,
@@ -816,32 +817,32 @@ const styles = StyleSheet.create({
   },
   tapRipple: {
     position: 'absolute',
-    width: 54,
-    height: 54,
-    right: 74,
-    bottom: 72,
-    borderRadius: 27,
+    width: 48,
+    height: 48,
+    right: 58,
+    bottom: 60,
+    borderRadius: 24,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.72)',
     backgroundColor: 'rgba(255,255,255,0.12)',
   },
   compactTapRipple: {
-    width: 46,
-    height: 46,
-    right: 58,
-    bottom: 66,
-    borderRadius: 23,
+    width: 40,
+    height: 40,
+    right: 46,
+    bottom: 54,
+    borderRadius: 20,
   },
   tapSparkles: {
     position: 'absolute',
     width: 86,
     height: 74,
-    right: 45,
-    bottom: 96,
+    right: 28,
+    bottom: 82,
   },
   compactTapSparkles: {
-    right: 34,
-    bottom: 86,
+    right: 20,
+    bottom: 70,
     transform: [{ scale: 0.9 }],
   },
   tapSpark: {
@@ -868,16 +869,16 @@ const styles = StyleSheet.create({
   },
   handTap: {
     position: 'absolute',
-    width: 118,
-    height: 118,
+    width: 102,
+    height: 102,
     right: 4,
-    bottom: -4,
+    bottom: 0,
   },
   compactHandTap: {
-    width: 98,
-    height: 98,
-    right: 0,
-    bottom: 2,
+    width: 84,
+    height: 84,
+    right: 2,
+    bottom: 6,
   },
   handTapImage: {
     width: '100%',
@@ -888,3 +889,4 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
 });
+
