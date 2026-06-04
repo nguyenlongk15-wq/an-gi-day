@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Heart, Play, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -20,6 +20,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const compact = width < 520;
   const tight = width < 380;
   const [startHovered, setStartHovered] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const eatScale = useRef(new Animated.Value(0.92)).current;
   const eatTranslateY = useRef(new Animated.Value(12)).current;
   const eatOpacity = useRef(new Animated.Value(0)).current;
@@ -27,6 +28,29 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const fastTranslateY = useRef(new Animated.Value(12)).current;
   const fastOpacity = useRef(new Animated.Value(0)).current;
   const connectorOpacity = useRef(new Animated.Value(0)).current;
+  const startScale = useRef(new Animated.Value(0.96)).current;
+  const startTranslateY = useRef(new Animated.Value(14)).current;
+  const startOpacity = useRef(new Animated.Value(0)).current;
+  const startBreathScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    let mounted = true;
+
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((enabled) => {
+        if (mounted) {
+          setReduceMotion(enabled);
+        }
+      })
+      .catch(() => undefined);
+
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+
+    return () => {
+      mounted = false;
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const resetTitleMotion = (scale: Animated.Value, translateY: Animated.Value, opacity: Animated.Value) => {
@@ -98,6 +122,73 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
 
     return () => titleMotion.stop();
   }, [connectorOpacity, eatOpacity, eatScale, eatTranslateY, fastOpacity, fastScale, fastTranslateY]);
+
+  useEffect(() => {
+    startScale.setValue(0.96);
+    startTranslateY.setValue(14);
+    startOpacity.setValue(0);
+    startBreathScale.setValue(1);
+
+    if (reduceMotion) {
+      startScale.setValue(1);
+      startTranslateY.setValue(0);
+      startOpacity.setValue(1);
+      return undefined;
+    }
+
+    const entranceMotion = Animated.sequence([
+      Animated.delay(180),
+      Animated.parallel([
+        Animated.timing(startOpacity, {
+          toValue: 1,
+          duration: 240,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+        Animated.timing(startTranslateY, {
+          toValue: 0,
+          duration: 420,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+        Animated.spring(startScale, {
+          toValue: 1,
+          tension: 86,
+          friction: 11,
+          useNativeDriver: useTitleNativeDriver,
+        }),
+      ]),
+    ]);
+
+    const breathMotion = Animated.loop(
+      Animated.sequence([
+        Animated.delay(3200),
+        Animated.timing(startBreathScale, {
+          toValue: 1.014,
+          duration: 520,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+        Animated.timing(startBreathScale, {
+          toValue: 1,
+          duration: 640,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+      ]),
+    );
+
+    entranceMotion.start(({ finished }) => {
+      if (finished) {
+        breathMotion.start();
+      }
+    });
+
+    return () => {
+      entranceMotion.stop();
+      breathMotion.stop();
+    };
+  }, [reduceMotion, startBreathScale, startOpacity, startScale, startTranslateY]);
 
   return (
     <ScrollView contentContainerStyle={[styles.scroll, compact && styles.compactScroll]}>
@@ -178,23 +269,50 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
           </View>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={onStart}
-          onHoverIn={() => setStartHovered(true)}
-          onHoverOut={() => setStartHovered(false)}
-          style={({ pressed }) => [styles.startButton, compact && styles.compactStartButton, startHovered && styles.startHovered, pressed && styles.pressed]}
+        <Animated.View
+          style={[
+            styles.startMotionWrap,
+            {
+              opacity: startOpacity,
+              transform: [{ translateY: startTranslateY }, { scale: startScale }],
+            },
+          ]}
         >
-          <LinearGradient
-            colors={['#FF563F', '#FF7758', '#FF9A4A']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.startGradient, compact && styles.compactStartGradient]}
-          >
-            <Play color={colors.ink} size={24} fill={colors.ink} />
-            <Text style={styles.startText}>Bắt đầu</Text>
-          </LinearGradient>
-        </Pressable>
+          <Animated.View style={{ transform: [{ scale: startBreathScale }] }}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onStart}
+              onHoverIn={() => setStartHovered(true)}
+              onHoverOut={() => setStartHovered(false)}
+              style={({ pressed }) => [
+                styles.startButton,
+                compact && styles.compactStartButton,
+                startHovered && styles.startHovered,
+                pressed && styles.startPressed,
+              ]}
+            >
+              <LinearGradient
+                colors={startHovered ? ['#FF4F3C', '#FF7950', '#FFB14D'] : ['#FF533E', '#FF724F', '#FFA64B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.startGradient, compact && styles.compactStartGradient]}
+              >
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.34)', 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={[styles.startGloss, styles.noPointerEvents]}
+                />
+                <View style={[styles.startPlayBadge, compact && styles.compactStartPlayBadge, startHovered && styles.startPlayBadgeHovered]}>
+                  <View style={startHovered && styles.startPlayNudge}>
+                    <Play color="#FF6748" size={compact ? 19 : 21} fill="#FF6748" />
+                  </View>
+                </View>
+                <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
+              </LinearGradient>
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
       </View>
     </ScrollView>
   );
@@ -409,36 +527,80 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     textDecorationColor: colors.yellow,
   },
+  startMotionWrap: {
+    width: '100%',
+  },
   startButton: {
-    minHeight: 68,
-    borderRadius: radius.xl,
+    minHeight: 72,
+    borderRadius: radius.pill,
     overflow: 'hidden',
+    backgroundColor: colors.primary,
     ...primaryShadow,
-    boxShadow: '0px 18px 36px rgba(255, 86, 63, 0.38)',
+    boxShadow: '0px 16px 26px rgba(255, 86, 63, 0.34), 0px 6px 12px rgba(255, 184, 77, 0.20)',
   },
   compactStartButton: {
-    minHeight: 64,
-    borderRadius: radius.lg,
+    minHeight: 66,
+    borderRadius: radius.pill,
   },
   startHovered: {
-    opacity: 0.97,
+    boxShadow: '0px 18px 30px rgba(255, 99, 66, 0.42), 0px 7px 14px rgba(255, 184, 77, 0.24)',
   },
   startGradient: {
-    minHeight: 68,
+    minHeight: 72,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: spacing.sm,
     paddingHorizontal: spacing.xl,
+    position: 'relative',
   },
   compactStartGradient: {
-    minHeight: 64,
+    minHeight: 66,
+  },
+  startGloss: {
+    position: 'absolute',
+    top: 0,
+    left: spacing.lg,
+    right: spacing.lg,
+    height: 22,
+    borderRadius: radius.pill,
+  },
+  startPlayBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    boxShadow: '0px 5px 10px rgba(112, 28, 14, 0.18)',
+  },
+  compactStartPlayBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  startPlayBadgeHovered: {
+    backgroundColor: 'rgba(255,255,255,0.96)',
+  },
+  startPlayNudge: {
+    transform: [{ translateX: 2 }],
   },
   startText: {
     color: colors.ink,
     ...typography.button,
-    fontSize: 22,
-    lineHeight: 28,
+    fontSize: 23,
+    lineHeight: 29,
+    textShadowColor: 'rgba(96, 20, 10, 0.26)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  compactStartText: {
+    fontSize: 21,
+    lineHeight: 27,
+  },
+  startPressed: {
+    opacity: 0.96,
+    transform: [{ scale: 0.975 }],
   },
   pressed: {
     opacity: 0.9,
