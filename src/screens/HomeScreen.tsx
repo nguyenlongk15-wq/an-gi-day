@@ -29,6 +29,8 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
   const fastTranslateY = useRef(new Animated.Value(12)).current;
   const fastOpacity = useRef(new Animated.Value(0)).current;
   const connectorOpacity = useRef(new Animated.Value(0)).current;
+  const questionMarkSpin = useRef(new Animated.Value(0)).current;
+  const questionMarkBounce = useRef(new Animated.Value(0)).current;
   const startScale = useRef(new Animated.Value(0.96)).current;
   const startTranslateY = useRef(new Animated.Value(14)).current;
   const startOpacity = useRef(new Animated.Value(0)).current;
@@ -130,6 +132,65 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
 
     return () => titleMotion.stop();
   }, [connectorOpacity, eatOpacity, eatScale, eatTranslateY, fastOpacity, fastScale, fastTranslateY]);
+
+  useEffect(() => {
+    questionMarkSpin.setValue(0);
+    questionMarkBounce.setValue(0);
+
+    if (reduceMotion) {
+      return undefined;
+    }
+
+    const bounceMotion = Animated.sequence([
+      Animated.timing(questionMarkBounce, {
+        toValue: 1,
+        duration: 135,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: useTitleNativeDriver,
+      }),
+      Animated.timing(questionMarkBounce, {
+        toValue: 0,
+        duration: 165,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: useTitleNativeDriver,
+      }),
+      Animated.timing(questionMarkBounce, {
+        toValue: 1,
+        duration: 115,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: useTitleNativeDriver,
+      }),
+      Animated.timing(questionMarkBounce, {
+        toValue: 0,
+        duration: 145,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: useTitleNativeDriver,
+      }),
+    ]);
+
+    const spinMotion = Animated.loop(
+      Animated.sequence([
+        Animated.delay(2300),
+        bounceMotion,
+        Animated.timing(questionMarkSpin, {
+          toValue: 1,
+          duration: 620,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: useTitleNativeDriver,
+        }),
+        Animated.timing(questionMarkSpin, {
+          toValue: 0,
+          duration: 1,
+          useNativeDriver: useTitleNativeDriver,
+        }),
+        Animated.delay(1500),
+      ]),
+    );
+
+    spinMotion.start();
+
+    return () => spinMotion.stop();
+  }, [questionMarkBounce, questionMarkSpin, reduceMotion]);
 
   useEffect(() => {
     startScale.setValue(0.96);
@@ -336,6 +397,18 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
     inputRange: [0, 1],
     outputRange: ['0deg', '-6deg'],
   });
+  const questionMarkRotationY = questionMarkSpin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  const questionMarkTranslateY = questionMarkBounce.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 4, -2],
+  });
+  const questionMarkScale = questionMarkBounce.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.94, 1.06],
+  });
 
   return (
     <ScrollView contentContainerStyle={[styles.scroll, compact && styles.compactScroll]}>
@@ -399,14 +472,26 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                   },
                 ]}
               >
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.82}
-                  style={[styles.titleSkip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
-                >
-                  Nhịn?
-                </Text>
+                <View style={styles.titleSkipRow}>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.82}
+                    style={[styles.titleSkip, compact && styles.compactTitleSkip, tight && styles.tightTitleSkip]}
+                  >
+                    Nhịn
+                  </Text>
+                  <Animated.View
+                    style={[
+                      styles.questionMarkRotor,
+                      compact && styles.compactQuestionMarkRotor,
+                      tight && styles.tightQuestionMarkRotor,
+                      { transform: [{ perspective: 800 }, { translateY: questionMarkTranslateY }, { scale: questionMarkScale }, { rotateY: questionMarkRotationY }] },
+                    ]}
+                  >
+                    <Text style={[styles.titleQuestionMark, compact && styles.compactTitleQuestionMark, tight && styles.tightTitleQuestionMark]}>?</Text>
+                  </Animated.View>
+                </View>
               </Animated.View>
             </View>
 
@@ -449,7 +534,7 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                 ]}
               >
                 <LinearGradient
-                  colors={startHovered ? ['#FFC66B', '#FF8A63', '#F35A68'] : ['#FFBA61', '#FF7F5F', '#F45A67']}
+                  colors={startHovered ? ['#FFE08C', '#FF9A68', '#F16A7F'] : ['#FFD27A', '#FF9265', '#EF617A']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={[styles.startGradient, compact && styles.compactStartGradient]}
@@ -461,9 +546,11 @@ export default function HomeScreen({ onStart, onNavigate }: HomeScreenProps) {
                     style={[styles.startGloss, styles.noPointerEvents]}
                   />
                   <View style={[styles.startPlayBadge, compact && styles.compactStartPlayBadge]}>
-                    <Play color={colors.ink} size={compact ? 30 : 34} fill={colors.ink} />
+                    <Play color={colors.ink} size={compact ? 28 : 32} fill={colors.ink} />
                   </View>
-                  <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
+                  <View style={[styles.startLabelPlate, compact && styles.compactStartLabelPlate]}>
+                    <Text style={[styles.startText, compact && styles.compactStartText]}>Bắt đầu</Text>
+                  </View>
                 </LinearGradient>
               </Pressable>
             </Animated.View>
@@ -705,6 +792,43 @@ const styles = StyleSheet.create({
     fontSize: 43,
     lineHeight: 50,
   },
+  titleSkipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  questionMarkRotor: {
+    width: 42,
+    height: 68,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 2,
+  },
+  compactQuestionMarkRotor: {
+    width: 36,
+    height: 58,
+  },
+  tightQuestionMarkRotor: {
+    width: 31,
+    height: 50,
+  },
+  titleQuestionMark: {
+    color: '#4BE3D1',
+    fontFamily: typography.hero.fontFamily,
+    fontSize: 60,
+    lineHeight: 68,
+    fontWeight: '800',
+    letterSpacing: 0.15,
+  },
+  compactTitleQuestionMark: {
+    fontSize: 50,
+    lineHeight: 58,
+  },
+  tightTitleQuestionMark: {
+    fontSize: 43,
+    lineHeight: 50,
+  },
   slogan: {
     color: 'rgba(255,255,255,0.82)',
     ...typography.description,
@@ -745,7 +869,7 @@ const styles = StyleSheet.create({
     width: 148,
     height: 148,
     borderRadius: 74,
-    boxShadow: '0px 14px 20px rgba(244, 90, 103, 0.28), 0px 5px 10px rgba(255, 186, 97, 0.18)',
+    boxShadow: '0px 18px 28px rgba(239, 97, 122, 0.24), 0px 6px 14px rgba(255, 210, 122, 0.18)',
     elevation: 9,
   },
   compactStartTapTarget: {
@@ -758,7 +882,7 @@ const styles = StyleSheet.create({
     height: 148,
     borderRadius: radius.pill,
     overflow: 'hidden',
-    backgroundColor: colors.primary,
+    backgroundColor: '#FF8E61',
     ...primaryShadow,
   },
   compactStartButton: {
@@ -773,12 +897,12 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: 4,
     paddingHorizontal: spacing.md,
     position: 'relative',
   },
   compactStartGradient: {
-    gap: 6,
+    gap: 5,
   },
   startGloss: {
     position: 'absolute',
@@ -794,21 +918,35 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   compactStartPlayBadge: {
     width: 34,
     height: 34,
     borderRadius: 17,
   },
+  startLabelPlate: {
+    minHeight: 38,
+    borderRadius: radius.pill,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactStartLabelPlate: {
+    minHeight: 35,
+    paddingHorizontal: 7,
+  },
   startText: {
-    color: colors.ink,
-    ...typography.button,
-    fontSize: 25,
-    lineHeight: 31,
+    color: '#FFF9F0',
+    fontFamily: typography.label.fontFamily,
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: '700',
+    letterSpacing: 0.1,
+    textAlign: 'center',
   },
   compactStartText: {
-    fontSize: 22,
+    fontSize: 20,
     lineHeight: 28,
   },
   startPressed: {
